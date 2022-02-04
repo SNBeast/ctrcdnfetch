@@ -47,26 +47,26 @@ namespace NintendoData {
 			u16 ContentType;
 			u64 ContentSize;
 			u8 SHA256[0x20];
-			u32 GetContentId() const noexcept {return Endian::Be(ContentId);}
-			u16 GetContentIndex() const noexcept {return Endian::Be(ContentIndex);}
-			u16 GetContentType() const noexcept {return Endian::Be(ContentType);}
-			u64 GetContentSize() const noexcept {return Endian::Be(ContentSize);}
+			u32 GetContentId() const noexcept { return Endian::Be(ContentId); }
+			u16 GetContentIndex() const noexcept { return Endian::Be(ContentIndex); }
+			u16 GetContentType() const noexcept { return Endian::Be(ContentType); }
+			u64 GetContentSize() const noexcept { return Endian::Be(ContentSize); }
 		};
 	private:
 		u8* rawtmd;
-		struct Header *header;
-		struct ContentInfoRecords *inforecords;
-		struct ContentChunkRecords *chunkrecords;
+		struct Header* header;
+		struct ContentInfoRecords* inforecords;
+		struct ContentChunkRecords* chunkrecords;
 	public:
 		u16 GetContentCount() const noexcept {
 			return Endian::Be(header->ContentCount);
 		}
-		const struct ContentInfoRecords &InfoRecord(const int index) const {
-			if(index < 0 || index > 64) std::out_of_range("TMDs only have 64 info records. Excepted range from 0 to 63.");
+		const struct ContentInfoRecords& InfoRecord(const int index) const {
+			if (index < 0 || index > 64) std::out_of_range("TMDs only have 64 info records. Excepted range from 0 to 63.");
 			return inforecords[index];
 		}
-		const struct ContentChunkRecords &ChunkRecord(const int index) const {
-			if(index < 0 || index > GetContentCount()) std::out_of_range("TMD doesn't have that many content records.");
+		const struct ContentChunkRecords& ChunkRecord(const int index) const {
+			if (index < 0 || index > GetContentCount()) std::out_of_range("TMD doesn't have that many content records.");
 			return chunkrecords[index];
 		}
 		TMD(const void* ptr, size_t ptrlen);

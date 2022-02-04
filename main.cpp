@@ -1,409 +1,623 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <vector>
-#include <exception>
-#include <stdexcept>
-#include <new>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <openssl/sha.h>
-#include "DownloadManager.hpp"
 #include "DirectoryManagement.hpp"
+#include "DownloadManager.hpp"
 #include "SharedStorage.hpp"
 #include "CDN.hpp"
-#include "Ticket.hpp"
-#include "Endian.hpp"
-#include "types.h"
 
-static const u8 baseticket[] = {0x00, 0x01, 0x00, 0x04, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x52, 0x6F, 0x6F, 0x74, 0x2D, 0x43, 0x41, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33, 0x2D, 0x58, 0x53, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x63, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x69, 0x74, 0x6C, 0x65, 0x49, 0x64, 0x21, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x14, 0x00, 0x00, 0x00, 0xAC, 0x00, 0x00, 0x00, 0x14, 0x00, 0x01, 0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x84, 0x00, 0x00, 0x00, 0x84, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+#include <sys/stat.h>
 
-static void loadcerts(u8*& ptr, const char* proxy) {
-	static const u8 expecteddigest[SHA256_DIGEST_LENGTH] = {0xDC, 0x15, 0x3C, 0x2B, 0x8A, 0x0A, 0xC8, 0x74, 0xA9, 0xDC, 0x78, 0x61, 0x0E, 0x6A, 0x8F, 0xE3, 0xE6, 0xB1, 0x34, 0xD5, 0x52, 0x88, 0x73, 0xC9, 0x61, 0xFB, 0xC7, 0x95, 0xCB, 0x47, 0xE6, 0x97};
-	u8 digest[SHA256_DIGEST_LENGTH] = {};
-	FILE* fp = NULL;
-	u8* data = NULL;
-	size_t read = 0;
-	do {
-		do {
-			if(NintendoData::SharedStorage::Load(fp, "CA00000003-XS0000000c.bin")) break;
-			data = (u8*)calloc(1792, 1);
-			if(!data) break;
-			if((read = fread(data, 1, 1792, fp)) == 1792)
-				SHA256(data, 1792, digest);
-		} while(0);
-		if(fp) fclose(fp);
-		if(data && read == 1792 && !memcmp(expecteddigest, digest, SHA256_DIGEST_LENGTH)) break;
-		u8* ticket = NULL;
-		try {
-			if(!data) data = (u8*)calloc(1792, 1);
-			if(!data) break;
-			DownloadManager manager;
-			manager.SetAttribute(DownloadManager::URL, "http://ccs.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk")
-				.SetAttribute(DownloadManager::BUFFER, true)
-				.SetAttribute(DownloadManager::PROGRESS, false);
-			if(proxy) manager.SetAttribute(DownloadManager::PROXY, proxy);
-			auto downloader = manager.GetDownloader();
-			if(!downloader.Download()) break;
-			size_t tiklen = 0;
-			ticket = (u8*)downloader.GetBufferAndDetach(tiklen);
-			if(!ticket || !tiklen) {
-				free(ticket);
-				break;
-			}
-			NintendoData::Ticket tik(ticket, tiklen);
-			if(tiklen - tik.TotalSize() != 1792) {
-				free(ticket);
-				break;
-			}
-			u8* certs = ticket + tik.TotalSize();
-			SHA256(certs, 1792, digest);
-			if(memcmp(expecteddigest, digest, SHA256_DIGEST_LENGTH)) {
-				free(ticket);
-				break;
-			}
-			NintendoData::SharedStorage::Save(certs, 1792, "CA00000003-XS0000000c.bin");
-			memcpy(data, certs, 1792);
-			read = 1792;
-			free(ticket);
-			break;
-		} catch(...) {
-			if(fp) fclose(fp);
-			free(data);
-			free(ticket);
-			throw;
-		}
-		throw std::runtime_error("Couldn't load certs.");
-	} while(0);
-	ptr = data;
-}
-
-struct arguments {
-	struct entry {
+struct arguments
+{
+	struct entry
+	{
 		const char* path = NULL;
 		u16 version = 0;
 		bool latest = true;
 	};
+
 	const char* proxy = NULL;
+
 	std::vector<struct entry> files;
+
 	bool printhelp = false;
-	bool useforcetkregardless = false;
+
 	bool printresponseheaders = false;
+	bool printhashes = false;
+	bool writeextrafiles = false;
+
 	bool nodownload = false;
 };
 
-//not that much.. yet 
-static void print_usage(const char* ptr) {
-	printf("Usage: %s [options] tickets [...]\n\n"
+static void load_certs(u8*& out_certs, const char* proxy)
+{
+	// DC153C2B8A0AC874A9DC78610E6A8FE3E6B134D5528873C961FBC795CB47E697
+	static const u8 expecteddigest[SHA256_DIGEST_LENGTH] = { 0xDC, 0x15, 0x3C, 0x2B, 0x8A, 0x0A, 0xC8, 0x74, 0xA9, 0xDC, 0x78, 0x61, 0x0E, 0x6A, 0x8F, 0xE3, 0xE6, 0xB1, 0x34, 0xD5, 0x52, 0x88, 0x73, 0xC9, 0x61, 0xFB, 0xC7, 0x95, 0xCB, 0x47, 0xE6, 0x97 };
+
+	u8 digest[SHA256_DIGEST_LENGTH];
+
+	FILE* fp = NULL;
+	u8* data = NULL;
+	size_t read = 0;
+
+	do
+	{
+		do
+		{
+			if (NintendoData::SharedStorage::Load(fp, "CA00000003-XS0000000c.bin"))
+				break;
+
+			data = (u8*)malloc(1792);
+
+			if (!data) break;
+			if ((read = fread(data, 1, 1792, fp)) == 1792) SHA256(data, 1792, digest);
+		} while (0);
+
+		if (fp) fclose(fp);
+		if (data && read == 1792 && !memcmp(expecteddigest, digest, SHA256_DIGEST_LENGTH)) break;
+
+		free(data);
+
+		u8* ticket = NULL;
+
+		try
+		{
+			if (!data) data = (u8*)malloc(1792);
+			if (!data) break;
+
+			DownloadManager manager;
+
+			manager
+				.SetAttribute(DownloadManager::URL, "http://ccs.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk")
+				.SetAttribute(DownloadManager::BUFFER, true)
+				.SetAttribute(DownloadManager::PROGRESS, false);
+
+			if (proxy)
+				manager.SetAttribute(DownloadManager::PROXY, proxy);
+
+			auto downloader = manager.GetDownloader(0);
+
+			if (!downloader.Download(0))
+				break;
+
+			size_t tiklen = 0;
+
+			ticket = (u8*)downloader.GetBufferAndDetach(tiklen);
+
+			if (!ticket || !tiklen)
+			{
+				free(ticket);
+				break;
+			}
+
+			NintendoData::Ticket tik(ticket, tiklen);
+
+			if (tiklen - tik.TotalSize() != 1792)
+			{
+				free(ticket);
+				break;
+			}
+
+			u8* certs = ticket + tik.TotalSize();
+
+			SHA256(certs, 1792, digest);
+
+			if (memcmp(expecteddigest, digest, SHA256_DIGEST_LENGTH))
+			{
+				free(ticket);
+				break;
+			}
+
+			NintendoData::SharedStorage::Save(certs, 1792, "CA00000003-XS0000000c.bin");
+
+			memcpy(data, certs, 1792);
+
+			read = 1792;
+
+			free(ticket);
+
+			break;
+		}
+		catch (...)
+		{
+			if (fp)
+				fclose(fp);
+
+			free(data);
+			free(ticket);
+
+			throw;
+		}
+
+		throw std::runtime_error("Couldn't load certs.");
+	} while (0);
+
+	out_certs = data;
+}
+
+static void print_usage(const char* executable_path)
+{
+	printf(
+		"Usage: %s [options] tickets [...]\n\n"
 		"Options:\n"
 		"  -p, --proxy [uri]   To set a proxy before connecting.\n"
-		"      --use-for-cetk  Use tickets always for cetk\n"
-		"                      Regardless they are eshop ones or not.\n"
-		"                      This makes CIAs not installable but\n"
-		"                      keeps original ticket on them.\n"
 		"  -r, --response      Print response headers.\n"
+		"  -s, --hashes        Print hashes for content/TMD.\n"
+		"  -e, --extra-files   Write extra files for headers/hashes (depending on -r and -s) of content/TMD.\n"
 		"  -n, --no-download   Doesn't download, implies -r.\n"
 		"  -h, --help          Show this message.\n"
-		"      --usage         Alias for help.\n"
-		"\nProxy format:\n"
+		"      --usage         Alias for help.\n\n"
+		"Proxy format:\n"
 		"  http[s]://[user[:password]@]example.org[:port]\n"
 		"  socks4[a]://[user[:password]@]example.org[:port]\n"
 		"  socks5[h]://[user[:password]@]example.org[:port]\n"
-		"  ...other schemes and formats that used libcurl supports.\n", ptr);
+		"  ...other schemes and formats that used libcurl supports.\n",
+		executable_path);
 }
 
-//search for :// basically
-//I'm putting trust on the user basically.....
-static bool checkforurlscheme(const char* ptr) {
-	for(; ptr[0] && ptr[1] && ptr[2]; ptr++) if(ptr[0] == ':' && ptr[1] == '/' && ptr[2] == '/') return true;
+static bool is_uri(const char* ptr)
+{
+	for (; ptr[0] && ptr[1] && ptr[2]; ptr++)
+		if (ptr[0] == ':' && ptr[1] == '/' && ptr[2] == '/')
+			return true;
 	return false;
 }
 
-static const char* checkifvalidticket(const char* ptr) {
-	struct stat buffer;
-	memset(&buffer, 0, sizeof(struct stat));
-	if(stat(ptr, &buffer) != 0) return "Stat can't access target...";
-	if((buffer.st_mode&S_IFMT) != S_IFREG) return "It's not a regular file.";
-	if(buffer.st_size < 848) return "File is too small than we expected...";
-	return NULL;
-}
+static bool parse_a_title(std::string& strerr, struct arguments& args, char* arg)
+{
+	const char* tik_err_reason = NULL;
 
-static bool parse_a_title(std::string& strerr, struct arguments& args, int i, char** argv) {
-	const char* reason;
-	if((reason = checkifvalidticket(argv[i])) != NULL) {
+	struct stat buffer;
+
+	memset(&buffer, 0, sizeof(struct stat));
+
+	if (stat(arg, &buffer) != 0)
+		tik_err_reason = "Could not stat file.";
+
+	if ((buffer.st_mode & S_IFMT) != S_IFREG)
+		tik_err_reason = "Specified ticket file is not a regular file.";
+
+	if (buffer.st_size < 848)
+		tik_err_reason = "Ticket is smaller than expected.";
+
+	if (tik_err_reason)
+	{
 		strerr += "Argument ignored: ";
-		strerr += argv[i];
+		strerr += arg;
 		strerr += "\n ";
-		strerr += reason;
+		strerr += tik_err_reason;
 		strerr += "\n";
 		return false;
 	}
+
 	bool found = false;
-	for(size_t foo = 0; foo < args.files.size(); foo++) 
-		if(!strcmp(argv[i], args.files[foo].path)) {
+
+	for (size_t foo = 0; foo < args.files.size(); foo++)
+	{
+		if (!strcmp(arg, args.files[foo].path))
+		{
 			found = true;
 			break;
 		}
-	struct arguments::entry newentry;
-	newentry.path = argv[i];
-	if(!found) args.files.push_back(newentry);
+	}
+
+	struct arguments::entry new_entry;
+
+	new_entry.path = arg;
+
+	if (!found)
+		args.files.push_back(new_entry);
+
 	return !found;
 }
 
 //Clean? Nope. Works? yup.
 //Enjoy indentation mess.
-static void parse_args(struct arguments& args, int argc, char** argv) {
-	try {
-		std::string strerr;
-		for(int i = 1; i < argc; i++) {
-			if(!*argv[i]) continue; //?? shouldn't happen but I'll leave it in as a fail safe..
-			if(*argv[i] != '-') {
-				parse_a_title(strerr, args, i, argv);
-				continue;
-			}
-			if(!argv[i][1]) {
-				strerr += "Argument ignored: ";
-				strerr += argv[i];
-				strerr += "\n";
-				continue;
-			}
-			if(argv[i][1] != '-') {
-				int current = i;
-				for(int j = 1; argv[current][j]; j++) {
-					switch(argv[current][j]) {
-					case 'h':
-						args.printhelp = true;
-						throw 0;
-						break;
-					case 'p':
-						if(!argv[i + 1]) {
-							strerr += "Argument ignored: p\n No proxy url argument found.\n";
-							continue;
-						}
-						if(!checkforurlscheme(argv[i + 1])) {
-							strerr += "Argument ignored: p\n No valid proxy url scheme found.\n";
-							continue;
-						}
-						args.proxy = argv[++i];
-						break;
-					case 'r':
-						args.printresponseheaders = true;
-						break;
-					case 'n':
-						args.nodownload = true;
-						args.printresponseheaders = true;
-						break;
-					case 'v':
-						if(!argv[i + 1] || !argv[i + 2]) {
-							strerr += "Argument ignored: v\n No more arguments.\n";
-							continue;
-						}
-						if(!parse_a_title(strerr, args, i + 2, argv)) {
-							i+=2;
-							strerr += "Argument ignored: v\n Bad ticket path.\n";
-							continue;
-						}
-						{
-							auto version = strtoul(argv[i + 1], NULL, 0);
-							if(version > 0xffff) {
-								args.files.pop_back();
-								strerr += "Argument ignored: v\n Bad Version.\n Won't process:\n ";
-								strerr += argv[i + 2];
-								strerr += "\n";
-								i+=2;
-								continue;
-							}
-							auto index = args.files.size()-1;
-							args.files[index].version = version;
-							args.files[index].latest = false;
-						}
-						i+=2;
-						break;
-					default:
-						strerr += "Argument ignored: ";
-						strerr += argv[current][j];
-						strerr += "\n Doesn't exist.\n";
-						break;
-					}
-				}
-				continue;
-			}
-			//last but not least, -- arguments
-			if(!argv[i][2]) {
-				strerr += "Argument ignored: ";
-				strerr += argv[i];
-				strerr += "\n";
-				continue;
-			}
-			if(!strcmp(&argv[i][2], "proxy")) {
-				if(!argv[i + 1]) {
-					strerr += "Argument ignored: p\n No proxy url argument found.\n";
-					continue;
-				}
-				if(!checkforurlscheme(argv[i + 1])) {
-					strerr += "Argument ignored: p\n No proxy url scheme found.\n";
-					continue;
-				}
-				args.proxy = argv[++i];
-				continue;
-			}
-			if(!strcmp(&argv[i][2], "use-for-cetk")) {
-				args.useforcetkregardless = true;
-				continue;
-			}
-			if(!strcmp(&argv[i][2], "response")) {
-				args.printresponseheaders = true;
-				continue;
-			}
-			if(!strcmp(&argv[i][2], "no-download")) {
-				args.nodownload = true;
-				args.printresponseheaders = true;
-				continue;
-			}
-			if(!strcmp(&argv[i][2], "version")) {
-				if(!argv[i + 1] || !argv[i + 2]) {
-					strerr += "Argument ignored: v\n No more arguments.\n";
-					continue;
-				}
-				if(!parse_a_title(strerr, args, i + 2, argv)) {
-					i+=2;
-					strerr += "Argument ignored: v\n Bad ticket path.\n";
-					continue;
-				}
-				auto version = strtoul(argv[i + 1], NULL, 0);
-				if(version > 0xffff) {
-					args.files.pop_back();
-					strerr += "Argument ignored: v\n Bad Version.\n Won't process:\n ";
-					strerr += argv[i + 2];
-					strerr += "\n";
-					i+=2;
-					continue;
-				}
-				auto index = args.files.size()-1;
-				args.files[index].version = version;
-				args.files[index].latest = false;
-				i+=2;
-				continue;
-			}
-			if(!strcmp(&argv[i][2], "help") || !strcmp(&argv[i][2], "usage")) {
-				args.printhelp = true;
-				throw 0;
-				continue;
-			}
+static void parse_args(struct arguments& args, int argc, char** argv)
+{
+	std::string strerr;
+
+	for (int i = 1; i < argc; i++)
+	{
+		if (!*argv[i])
+			continue; //?? shouldn't happen but I'll leave it in as a fail safe..
+		if (*argv[i] != '-')
+		{
+			parse_a_title(strerr, args, argv[i]);
+			continue;
+		}
+		if (!argv[i][1])
+		{
 			strerr += "Argument ignored: ";
 			strerr += argv[i];
-			strerr += "\n Doesn't exist.\n";
+			strerr += "\n";
+			continue;
 		}
-		if(!strerr.empty()) fprintf(stderr, "%s\n", strerr.c_str());
-	} catch (int) {}
+		if (argv[i][1] != '-')
+		{
+			int current = i;
+			for (int j = 1; argv[current][j]; j++)
+			{
+				switch (argv[current][j])
+				{
+				case 'h':
+					args.printhelp = true;
+
+					return;
+				case 'p':
+					if (!argv[i + 1])
+					{
+						strerr += "Argument ignored: p\n No proxy url argument found.\n";
+						continue;
+					}
+
+					if (!is_uri(argv[i + 1]))
+					{
+						strerr += "Argument ignored: p\n No valid proxy url scheme found.\n";
+						continue;
+					}
+
+					args.proxy = argv[++i];
+					
+					break;
+				case 'r':
+					args.printresponseheaders = true;
+					break;
+				case 's':
+					if (args.nodownload)
+					{
+						strerr += "Argument ignored: s\n Cannot print hashes if not downloading.";
+						continue;
+					}
+
+					args.printhashes = true;
+					break;
+				case 'e':
+					if (args.nodownload)
+					{
+						strerr += "Argument ignored: e\n Cannot write extra files if not downloading.";
+						continue;
+					}
+
+					args.writeextrafiles = true;
+					break;
+				case 'n':
+					if (args.printhashes || args.writeextrafiles)
+					{
+						strerr += "Argument ignored: n\n Cannot print hashes / write extra files if not downloading.";
+						continue;
+					}
+
+					args.nodownload = true;
+					args.printresponseheaders = true;
+					break;
+				case 'v':
+					{
+						if (!argv[i + 1] || !argv[i + 2])
+					{
+						strerr += "Argument ignored: v\n No more arguments.\n";
+						continue;
+					}
+
+					if (!parse_a_title(strerr, args, argv[i + 2]))
+					{
+						i += 2;
+						
+						strerr += "Argument ignored: v\n Bad ticket path.\n";
+						continue;
+					}
+					
+					u32 version = strtoul(argv[i + 1], NULL, 0);
+
+					if (version > 0xffff)
+					{
+						args.files.pop_back();
+
+						strerr += "Argument ignored: v\n Bad Version.\n Won't process:\n ";
+						strerr += argv[i + 2];
+						strerr += "\n";
+
+						i += 2;
+						continue;
+					}
+
+					u32 idx = args.files.size() - 1;
+
+					args.files[idx].version = version;
+					args.files[idx].latest = false;
+
+					i += 2;
+
+					break;
+					}
+				default:
+					strerr += "Argument ignored: ";
+					strerr += argv[current][j];
+					strerr += "\n Doesn't exist.\n";
+
+					break;
+				}
+			}
+			continue;
+		}
+		//last but not least, -- arguments
+		if (!argv[i][2])
+		{
+			strerr += "Argument ignored: ";
+			strerr += argv[i];
+			strerr += "\n";
+			continue;
+		}
+
+		if (!strcmp(&argv[i][2], "proxy"))
+		{
+			if (!argv[i + 1])
+			{
+				strerr += "Argument ignored: p\n No proxy url argument found.\n";
+				continue;
+			}
+
+			if (!is_uri(argv[i + 1]))
+			{
+				strerr += "Argument ignored: p\n No proxy url scheme found.\n";
+				continue;
+			}
+
+			args.proxy = argv[++i];
+			continue;
+		}
+
+		if (!strcmp(&argv[i][2], "response"))
+		{
+			args.printresponseheaders = true;
+			continue;
+		}
+
+		if (!strcmp(&argv[i][2], "hashes"))
+		{
+			if (args.nodownload)
+			{
+				strerr += "Argument ignored: s\n Cannot print hashes if not downloading.";
+				continue;
+			}
+
+			args.printhashes = true;
+			continue;
+		}
+
+		if (!strcmp(&argv[i][2], "extra-files"))
+		{
+			if (args.nodownload)
+			{
+				strerr += "Argument ignored: e\n Cannot write extra files if not downloading.";
+				continue;
+			}
+
+			args.writeextrafiles = true;
+			continue;
+		}
+
+		if (!strcmp(&argv[i][2], "no-download"))
+		{
+			if (args.printhashes || args.writeextrafiles)
+			{
+				strerr += "Argument ignored: n\n Cannot print hashes / write extra files if not downloading.";
+				continue;
+			}
+
+			args.nodownload = true;
+			args.printresponseheaders = true;
+			continue;
+		}
+
+		if (!strcmp(&argv[i][2], "version"))
+		{
+			if (!argv[i + 1] || !argv[i + 2])
+			{
+				strerr += "Argument ignored: v\n No more arguments.\n";
+				continue;
+			}
+
+			if (!parse_a_title(strerr, args, argv[i + 2]))
+			{
+				i += 2;
+
+				strerr += "Argument ignored: v\n Bad ticket path.\n";
+				continue;
+			}
+
+			u32 version = strtoul(argv[i + 1], NULL, 0);
+
+			if (version > 0xffff)
+			{
+				args.files.pop_back();
+
+				strerr += "Argument ignored: v\n Bad Version.\n Won't process:\n ";
+				strerr += argv[i + 2];
+				strerr += "\n";
+
+				i += 2;
+				continue;
+			}
+
+			size_t index = args.files.size() - 1;
+
+			args.files[index].version = version;
+			args.files[index].latest = false;
+
+			i += 2;
+			continue;
+		}
+
+		if (!strcmp(&argv[i][2], "help") || !strcmp(&argv[i][2], "usage"))
+		{
+			args.printhelp = true;
+
+			return;
+		}
+
+		strerr += "Argument ignored: ";
+		strerr += argv[i];
+		strerr += "\n Doesn't exist.\n";
+	}
+
+	if (!strerr.empty())
+		fprintf(stderr, "%s\n", strerr.c_str());
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 	struct arguments args;
-	try {
+
+	try
+	{
 		parse_args(args, argc, argv);
-	} catch(std::exception& e) {
+	}
+	catch (std::exception& e)
+	{
 		fprintf(stderr, "Something prevented the program to parse arguments.\n"
 			"Can't continue.\n"
-			"Caugth exception message: %s\n", e.what());
+			"Caught exception message: %s\n",
+			e.what());
 		return 1;
 	}
-	if(args.printhelp || argc < 2) {
+
+	if (args.printhelp || argc < 2)
+	{
 		print_usage(argv[0]);
 		return 0;
 	}
-	if(args.proxy) printf("[INFO] Using proxy: %s\n", args.proxy);
-	std::vector<u64> processedtids;
-	u8* tikbuffer = (u8*)calloc(848, 1);
-	u8* cetkstart = (u8*)calloc(848, 1);
-	u8* certs = NULL;
-	try {
-		loadcerts(certs, args.proxy);
-	} catch(std::exception& e) {
-		fprintf(stderr, "Something prevented the obtain ticket certificates.\n"
-			"Can't continue.\n"
-			"Caugth exception message: %s\n", e.what());
+
+	if (args.writeextrafiles && !args.printhashes && !args.printresponseheaders)
+	{
+		fprintf(stderr, "Cannot write extra files if printing hashes/response headers is not enabled.\n");
 		return 1;
 	}
-	if(!tikbuffer || !cetkstart) {
+
+	if (args.proxy)
+		printf("[INFO] Using proxy: %s\n", args.proxy);
+
+	std::vector<u64> processedtids;
+
+	u8* tikbuffer = (u8*)malloc(848);
+	u8* certs = NULL;
+
+	try
+	{
+		load_certs(certs, args.proxy);
+	}
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "Something prevented the obtain ticket certificates.\n"
+			"Can't continue.\n"
+			"Caught exception message: %s\n",
+			e.what());
+		return 1;
+	}
+
+	if (!tikbuffer)
+	{
 		fprintf(stderr, "Something prevented the program to allocate memory to start.\n"
 			"Can't continue.\n");
 		return 1;
 	}
-	for(size_t i = 0; i < args.files.size(); i++) {
+
+	for (size_t i = 0; i < args.files.size(); i++)
+	{
 		//this only supports RSA_2048_SHA256 type and Root-CA00000003-XS0000000c issuer tickets.
-		FILE *fp = fopen(args.files[i].path, "rb");
-		if(!fp) {
+		FILE* fp = fopen(args.files[i].path, "rb");
+
+		if (!fp)
+		{
 			fprintf(stderr, "Failed to open \"%s\". Skipping...\n", args.files[i].path);
 			continue;
 		}
-		auto readtotal = fread(tikbuffer, 1, 848, fp);
-		if(readtotal != 848) {
+
+		size_t read_tik_bytes = fread(tikbuffer, 1, 848, fp);
+		fclose(fp);
+
+		if (read_tik_bytes != 848)
+		{
 			fprintf(stderr, "Failed to read 848 bytes from \"%s\". Skipping...\n", args.files[i].path);
-			fclose(fp);
 			continue;
 		}
-		fclose(fp);
-		char *outpath = NULL;
-		try {
+
+		char* outpath = NULL;
+
+		try
+		{
 			NintendoData::Ticket tik(tikbuffer, 848, true);
+			u64 current_title_id = tik.TitleID();
+
 			bool skip = false;
-			for(size_t j = 0; j < processedtids.size(); j++) 
-				if(processedtids[j] == tik.TitleID()) {
+
+			for (size_t j = 0; j < processedtids.size(); j++)
+			{
+				if (processedtids[j] == current_title_id)
+				{
 					skip = true;
 					break;
 				}
-			if(skip) {
+			}
+
+			if (skip)
+			{
 				printf("Skipping \"%s\", already downloaded title from ticket.\n", args.files[i].path);
 				continue;
 			}
-			if(!args.useforcetkregardless && (tik.eShopID() || tik.ConsoleID())) {
-				memcpy(cetkstart, baseticket, 848);
-				memcpy(&cetkstart[0x1BF], tik.GetHeader().TitleKey, 16); //keep key
-				*(u64*)(&cetkstart[0x1DC]) = Endian::Be(tik.TitleID()); //and title id
-			} else memcpy(cetkstart, tikbuffer, 848);
-			printf("Downloading Title ID %016llX...\n", (unsigned long long)tik.TitleID());
+
+			printf("Downloading Title ID %016llX...\n", (unsigned long long)current_title_id);
+
 			NintendoData::CDN cdnaccess(tik);
-			if(args.proxy) cdnaccess.SetProxy(args.proxy);
+
+			if (args.proxy)
+				cdnaccess.SetProxy(args.proxy);
+
 			cdnaccess.SetHeaderPrint(args.printresponseheaders);
-			size_t len = 0;
-			if(!args.nodownload) {
-				len = snprintf(NULL, 0, "%016llX/cetk", (unsigned long long)cdnaccess.GetTitleId());
-				outpath = (char*)calloc(len+1, 1);
-				if(!outpath) throw std::bad_alloc();
-				snprintf(outpath, len+1, "%016llX", (unsigned long long)cdnaccess.GetTitleId());
-				if(Utils::DirectoryManagement::MakeDirectory(outpath))
+			cdnaccess.SetHashesPrint(args.printhashes);
+
+			if (!args.nodownload)
+			{
+				outpath = (char*)malloc(16 + 1);
+
+				if (!outpath)
+					throw std::bad_alloc();
+
+				snprintf(outpath, 16 + 1, "%016llX", (unsigned long long)current_title_id);
+
+				if (Utils::DirectoryManagement::MakeDirectory(outpath))
 					throw std::runtime_error("Failed to create directory");
-			} else {
+			}
+			else
+			{
 				cdnaccess.SetNoDownload(true);
-				outpath = NULL;
 			}
-			if(!args.files[i].latest) cdnaccess.SetVersion(args.files[i].version);
-			cdnaccess.Download(outpath);
-			if(!args.nodownload) {
-				snprintf(outpath, len+1, "%016llX/cetk", (unsigned long long)cdnaccess.GetTitleId());
-				fp = fopen(outpath, "wb");
-				if(!fp) {
-					fprintf(stderr, "Failed to open \"%s\". Skipping...\n", outpath);
-					free(outpath);
-					continue;
-				}
-				fwrite(cetkstart, 1, 848, fp);
-				fwrite(certs, 1, 1792, fp);
-				fclose(fp);
-				free(outpath);
-			}
+
+			if (!args.files[i].latest)
+				cdnaccess.SetVersion(args.files[i].version);
+
+			cdnaccess.Download(outpath, args.writeextrafiles);
+
+			free(outpath);
 			outpath = NULL;
-			processedtids.push_back(cdnaccess.GetTitleId());
-		} catch(std::exception& e) {
+			processedtids.push_back(current_title_id);
+		}
+		catch (std::exception& e)
+		{
 			fflush(stdout);
 			fprintf(stderr, "Something prevented the program to download target.\n"
 				"Skipping \"%s\"...\n"
-				"Caugth exception message: %s\n\n", args.files[i].path, e.what());
-			free(outpath);
+				"Caught exception message: %s\n\n",
+				args.files[i].path, e.what());
+
+			if (outpath)
+				free(outpath);
+
 			outpath = NULL;
 			continue;
 		}
 	}
+
+	free(tikbuffer);
+	free(certs);
+
 	return 0;
 }

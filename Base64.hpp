@@ -2,7 +2,8 @@
 #define __BASE64_HPP__
 #include "types.h"
 
-namespace Base64 {
+namespace Base64
+{
 	void Encode(const u8* data, size_t datalen, char*& out);
 }
 

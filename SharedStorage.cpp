@@ -5,228 +5,264 @@
 #include "SharedStorage.hpp"
 #include "DirectoryManagement.hpp"
 
-#if defined _WIN16 || defined _WIN32 || defined _WIN64
-#define HOME "USERPROFILE"
-#define DELIMITORS "/\\"
-#else
-#define HOME "HOME"
-#define DELIMITORS "/"
-#endif
-
 namespace {
-	struct storage {
+	struct storage
+	{
 		const char* const path;
-		const char* const env;
-		int getfullpath(char*& fullpath) const noexcept {
-			const char* foo = getenv(env);
-			if(!foo) {
-				errno = EADDRNOTAVAIL;
-				return errno;
-			}
-			size_t length = snprintf(NULL, 0, path, foo) + 1;
-			fullpath = (char*)calloc(length, 1);
-			if(!fullpath) {
-				errno = ENOMEM;
-				return errno;
-			}
-			snprintf(fullpath, length, path, foo);
-			errno = 0;
-			return errno;
+
+		int getfullpath(char*& fullpath) const noexcept
+		{
+			const char* home_dir = getenv("HOME");
+
+			if (!home_dir) return errno = EADDRNOTAVAIL;
+
+			size_t length = snprintf(NULL, 0, path, home_dir) + 1;
+
+			fullpath = (char*)malloc(length);
+
+			if (!fullpath) return errno = ENOMEM;
+
+			snprintf(fullpath, length, path, home_dir);
+
+			return errno = 0;
 		}
-		int checkpath() const noexcept {
+
+		int checkpath() const noexcept
+		{
 			char* fullpath = NULL;
-			int err = 0;
-			if((err = getfullpath(fullpath)) != 0) {
-				errno = err;
-				return errno;
-			}
-			err = Utils::DirectoryManagement::CheckIfDir(fullpath);
+
+			int ret = 0;
+
+			if ((ret = getfullpath(fullpath)) != 0) return errno = ret;
+
+			ret = Utils::DirectoryManagement::PathIsDirectory(fullpath);
+
 			free(fullpath);
-			errno = err;
-			return errno;
+
+			return errno = ret;
 		}
-		int createpath() const noexcept {
+
+		int createpath() const noexcept
+		{
 			char* fullpath = NULL;
 			int err = 0;
-			if((err = getfullpath(fullpath)) != 0) {
-				errno = err;
-				return errno;
-			}
+
+			if ((err = getfullpath(fullpath)) != 0) return errno = err;
+
 			err = Utils::DirectoryManagement::MakeDirectory(fullpath);
+
 			free(fullpath);
-			errno = err;
-			return errno;
+
+			return errno = err;
 		}
 	};
 
-	static const struct storage storages[] = {
-		#if defined _WIN16 || defined _WIN32 || defined _WIN64
-		{"%s/3ds", "APPDATA"},
-		#endif
-		#if defined __APPLE__ && defined __MACH__
-		{"%s/Library/Application Support/3ds", "HOME"},
-		#endif
-		{"%s/.3ds", HOME},
-		{"%s/3ds", HOME}
+	static const struct storage storages[] =
+	{
+		{ "%s/.3ds" },
+		{ "%s/3ds"  }
 	};
 }
 
-int NintendoData::SharedStorage::Load(FILE*& out, const char* file) noexcept {
-	if(!file) {
-		errno = EFAULT;
-		return errno;
-	}
-	if(!file[0]) {
-		errno = EINVAL;
-		return errno;
-	}
+int NintendoData::SharedStorage::Load(FILE*& out, const char* file) noexcept
+{
+	if (!file) return errno = EFAULT;
+	if (!file[0]) return errno = EINVAL;
+
 	out = NULL;
-	bool foundastorage = false;
+
+	bool storage_found = false;
+
 	int err = 0;
 	int i = 0;
 	int numofstorages = sizeof(storages) / sizeof(struct storage);
-	for(;;) {
-		for(; i < numofstorages; i++)
-			if((err = storages[i].checkpath()) == 0) break;
-		if(i >= numofstorages) break;
-		foundastorage = true;
+
+	while (true)
+	{
+		for (; i < numofstorages; i++)
+			if ((err = storages[i].checkpath()) == 0) break;
+
+		if (i >= numofstorages) break;
+
+		storage_found = true;
+
 		char* fullstoragepath = NULL;
-		if((err = storages[i].getfullpath(fullstoragepath)) != 0)
+
+		if ((err = storages[i].getfullpath(fullstoragepath)) != 0)
 			continue;
+
 		size_t length = snprintf(NULL, 0, "%s/%s", fullstoragepath, file) + 1;
-		char* fullpath = (char*)calloc(length, 1);
-		if(!fullpath) {
+
+		char* fullpath = (char*)malloc(length);
+
+		if (!fullpath)
+		{
 			free(fullstoragepath);
 			err = ENOMEM;
 			continue;
 		}
+
 		snprintf(fullpath, length, "%s/%s", fullstoragepath, file);
 		free(fullstoragepath);
+
 		out = fopen(fullpath, "rb");
-		if(!out) {
+
+		if (!out)
+		{
 			err = errno;
 			i++;
 		};
+
 		free(fullpath);
-		if(out) {
+
+		if (out)
+		{
 			err = 0;
 			break;
 		}
 	}
-	if(!foundastorage) {
-		for(i = 0; i < numofstorages; i++)
-			if(!storages[i].createpath()) break;
+
+	if (!storage_found)
+	{
+		for (i = 0; i < numofstorages; i++)
+			if (!storages[i].createpath()) break;
 	}
-	errno = err;
-	return errno;
+
+	return errno = err;
 }
 
 int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* file) noexcept {
-	if(!file || (!in && inlen)) {
-		errno = EFAULT;
-		return errno;
-	}
-	if(!file[0]) {
-		errno = EINVAL;
-		return errno;
-	}
+	if (!file || (!in && inlen)) return errno = EFAULT;
+	if (!file[0]) return errno = EINVAL;
+
 	int err = 0;
 	int i;
+
 	int numofstorages = sizeof(storages) / sizeof(struct storage);
-	for(i = 0; i < numofstorages; i++)
-		if((err = storages[i].checkpath()) == 0) break;
+
+	for (i = 0; i < numofstorages; i++)
+		if ((err = storages[i].checkpath()) == 0) break;
 	//failed, no storages.
-	if(i >= numofstorages) {
-		for(i = 0; i < numofstorages; i++)
-			if((err = storages[i].createpath()) == 0) break;
+	if (i >= numofstorages)
+	{
+		for (i = 0; i < numofstorages; i++)
+			if ((err = storages[i].createpath()) == 0) break;
 		//failed, again?
-		if(i >= numofstorages) {
-			errno = err;
-			return err;
-		}
+		if (i >= numofstorages) return errno = err;
 	}
+
 	err = 0;
-	char* filepathcopy = (char*)calloc(strlen(file)+1,1);
-	if(!filepathcopy) {
-		errno = ENOMEM;
-		return errno;
-	}
+
+	char* filepathcopy = (char*)malloc(strlen(file) + 1);
+
+	if (!filepathcopy) return errno = ENOMEM;
+
 	strcpy(filepathcopy, file);
-	char *part1 = NULL, *part2 = NULL;
-	char *str = filepathcopy, *save = NULL;
-	char *dirpath = (char*)calloc(1,1);
+
+	char* str = filepathcopy;
+	char* part1 = NULL;
+	char* part2 = NULL;
+	char* save = NULL;
+
+	char* dirpath = (char*)malloc(1);
+
 	size_t currentsize = 1; //start at one because will refer to null.
-	if(!dirpath) {
+
+	if (!dirpath)
+	{
 		free(filepathcopy);
-		errno = ENOMEM;
-		return errno;
+		return errno = ENOMEM;
 	}
-	for(;; str = NULL) {
-		part1 = strtok_r(str, DELIMITORS, &save);
-		if(!part1) break;
-		if(part2) {
+
+	for (;; str = NULL) {
+		part1 = strtok_r(str, "/", &save);
+
+		if (!part1) break;
+		if (part2)
+		{
 			currentsize += 1 + strlen(part2); // a / and the string
+
 			char* tmp = (char*)realloc(dirpath, currentsize);
-			if(!tmp) {
+
+			if (!tmp)
+			{
 				free(dirpath);
 				free(filepathcopy);
-				errno = ENOMEM;
-				return errno;
+				return errno = ENOMEM;
 			}
+
 			dirpath = tmp;
 			strcat(dirpath, "/");
 			strcat(dirpath, part2);
 		}
 		part2 = part1;
 	}
+
 	free(filepathcopy);
+
 	char* storagepath = NULL;
-	if((err = storages[i].getfullpath(storagepath)) != 0) {
+
+	if ((err = storages[i].getfullpath(storagepath)) != 0)
+	{
 		free(dirpath);
-		errno = err;
-		return errno;
+		return errno = err;
 	}
+
 	size_t length = snprintf(NULL, 0, "%s%s", storagepath, dirpath) + 1;
-	char* fullpath = (char*)calloc(length, 1);
-	if(!fullpath) {
+
+	char* fullpath = (char*)malloc(length);
+
+	if (!fullpath)
+	{
 		free(storagepath);
 		free(dirpath);
-		errno = ENOMEM;
-		return errno;
+		return errno = ENOMEM;
 	}
+
 	snprintf(fullpath, length, "%s%s", storagepath, dirpath);
+
 	free(dirpath);
+
 	err = Utils::DirectoryManagement::MakeDirectory(fullpath);
+
 	free(fullpath);
-	if(err) {
+
+	if (err)
+	{
 		free(storagepath);
-		errno = err;
-		return errno;
+		return errno = err;
 	}
+
 	length = snprintf(NULL, 0, "%s/%s", storagepath, file) + 1;
-	fullpath = (char*)calloc(length, 1);
-	if(!fullpath) {
+
+	fullpath = (char*)malloc(length);
+
+	if (!fullpath)
+	{
 		free(storagepath);
-		errno = ENOMEM;
-		return errno;
+		return errno = ENOMEM;
 	}
+
 	snprintf(fullpath, length, "%s/%s", storagepath, file);
+
 	free(storagepath);
+
 	FILE* fp = fopen(fullpath, "wb");
-	if(!fp) return errno;
-	if(inlen) {
+
+	if (!fp) return errno;
+	if (inlen)
+	{
 		fwrite(in, inlen, 1, fp);
-		if(fflush(fp)) {
+		if (fflush(fp) != 0) {
 			err = errno;
 			fclose(fp);
 			remove(fullpath);
 			free(fullpath);
-			errno = err;
-			return errno;
+			return errno = err;
 		}
 	}
+
 	fclose(fp);
 	free(fullpath);
-	errno = 0;
-	return errno;
+	return errno = 0;
 }

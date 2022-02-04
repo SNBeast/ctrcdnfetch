@@ -12,8 +12,4 @@ typedef int16_t s16;
 typedef int32_t s32;
 typedef int64_t s64;
 
-#ifdef _MSC_VER
-#define ALIGN(x) __declspec(align(x))
-#else
 #define ALIGN(x) __attribute__((aligned(x)))
-#endif

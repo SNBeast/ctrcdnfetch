@@ -1,8 +1,5 @@
 #ifndef __ENDIAN_HPP__
 #define __ENDIAN_HPP__
-#if defined _MSC_VER
-#include <cstdlib>
-#endif
 #include <cstring>
 #include "types.h"
 
@@ -43,8 +40,6 @@ u16 Endian::Be16(const u16* value) noexcept {
 	if(check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap16(_value);
-		#elif defined _MSC_VER
-		_value = _byteswap_ushort(_value);
 		#else
 		u16 tmp = _value;
 		for(int i = 0; i < sizeof(u16); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
@@ -57,8 +52,6 @@ u16 Endian::Be16(u16 value) noexcept {
 	if(check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap16(value);
-		#elif defined _MSC_VER
-		value = _byteswap_ushort(value);
 		#else
 		u16 tmp = value;
 		for(int i = 0; i < sizeof(u16); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
@@ -73,8 +66,6 @@ u32 Endian::Be32(const u32* value) noexcept {
 	if(check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap32(_value);
-		#elif defined _MSC_VER
-		_value = _byteswap_ulong(_value);
 		#else
 		u32 tmp = _value;
 		for(int i = 0; i < sizeof(u32); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
@@ -87,8 +78,6 @@ u32 Endian::Be32(u32 value) noexcept {
 	if(check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap32(value);
-		#elif defined _MSC_VER
-		value = _byteswap_ulong(value);
 		#else
 		u32 tmp = value;
 		for(int i = 0; i < sizeof(u32); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
@@ -103,8 +92,6 @@ u64 Endian::Be64(const u64* value) noexcept {
 	if(check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap64(_value);
-		#elif defined _MSC_VER
-		_value = _byteswap_uint64(_value);
 		#else
 		u64 tmp = _value;
 		for(int i = 0; i < sizeof(u64); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
@@ -117,8 +104,6 @@ u64 Endian::Be64(u64 value) noexcept {
 	if(check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap64(value);
-		#elif defined _MSC_VER
-		value = _byteswap_uint64(value);
 		#else
 		u64 tmp = value;
 		for(int i = 0; i < sizeof(u64); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
@@ -133,8 +118,6 @@ u16 Endian::Le16(const u16* value) noexcept {
 	if(!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap16(_value);
-		#elif defined _MSC_VER
-		_value = _byteswap_ushort(_value);
 		#else
 		u16 tmp = _value;
 		for(int i = 0; i < sizeof(u16); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
@@ -147,8 +130,6 @@ u16 Endian::Le16(u16 value) noexcept {
 	if(!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap16(value);
-		#elif defined _MSC_VER
-		value = _byteswap_ushort(value);
 		#else
 		u16 tmp = value;
 		for(int i = 0; i < sizeof(u16); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
@@ -163,8 +144,6 @@ u32 Endian::Le32(const u32* value) noexcept {
 	if(!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap32(_value);
-		#elif defined _MSC_VER
-		_value = _byteswap_ulong(_value);
 		#else
 		u32 tmp = _value;
 		for(int i = 0; i < sizeof(u32); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
@@ -177,8 +156,6 @@ u32 Endian::Le32(u32 value) noexcept {
 	if(!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap32(value);
-		#elif defined _MSC_VER
-		value = _byteswap_ulong(value);
 		#else
 		u32 tmp = value;
 		for(int i = 0; i < sizeof(u32); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
@@ -193,8 +170,6 @@ u64 Endian::Le64(const u64* value) noexcept {
 	if(!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap64(_value);
-		#elif defined _MSC_VER
-		_value = _byteswap_uint64(_value);
 		#else
 		u64 tmp = _value;
 		for(int i = 0; i < sizeof(u64); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
@@ -207,8 +182,6 @@ u64 Endian::Le64(u64 value) noexcept {
 	if(!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap64(value);
-		#elif defined _MSC_VER
-		value = _byteswap_uint64(value);
 		#else
 		u64 tmp = value;
 		for(int i = 0; i < sizeof(u64); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
