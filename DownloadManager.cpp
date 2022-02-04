@@ -422,12 +422,12 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 			return false;
 		}
 
-		char sha256_str[0x41], sha1_str[0x29], md5_str[0x21], hash_str[0xC4];
+		char sha256_str[0x41], sha1_str[0x29], md5_str[0x21], hash_str[0xE0];
 
 		memset(sha256_str, 0, 0x41);
 		memset(sha1_str, 0, 0x29);
 		memset(md5_str, 0, 0x21);
-		memset(hash_str, 0, 0xC4);
+		memset(hash_str, 0, 0xE0);
 
 		snbytes2hex(sha256_str, sha256, 0x20);
 		snbytes2hex(sha1_str, sha1, 0x14);
@@ -435,12 +435,13 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 
 		snprintf(
 			hash_str, 
-			0xC4,
+			0xE0,
 			"SHA-256 : %s\n"
 			"SHA-1   : %s\n"
 			"MD5     : %s\n"
-			"CRC32   : %08X\n",
-			sha256_str, sha1_str, md5_str, crc);
+			"CRC32   : %08X\n"
+			"Size    : %ld\n",
+			sha256_str, sha1_str, md5_str, crc, dl_bytes);
 
 		printf("Hashes: \n\n%s\n", hash_str);
 
