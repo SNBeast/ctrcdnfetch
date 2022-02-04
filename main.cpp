@@ -138,18 +138,19 @@ static void print_usage(const char* executable_path)
 	printf(
 		"Usage: %s [options] tickets [...]\n\n"
 		"Options:\n"
-		"  -p, --proxy [uri]   To set a proxy before connecting.\n"
-		"  -r, --response      Print response headers.\n"
-		"  -s, --hashes        Print hashes for content/TMD.\n"
-		"  -e, --extra-files   Write extra files for headers/hashes (depending on -r and -s) of content/TMD.\n"
-		"  -n, --no-download   Doesn't download, implies -r.\n"
-		"  -h, --help          Show this message.\n"
-		"      --usage         Alias for help.\n\n"
+		"  -p, --proxy [uri]          To set a proxy before connecting.\n"
+		"  -v, --version [version]    To set the version of the title to download.\n"
+		"  -r, --response             Print response headers.\n"
+		"  -s, --hashes               Print hashes for content/TMD.\n"
+		"  -e, --extra-files          Write extra files for headers/hashes (depending on -r and -s) of content/TMD.\n"
+		"  -n, --no-download          Doesn't download, implies -r.\n"
+		"  -h, --help                 Shows this message.\n"
+		"      --usage                Alias for help.\n\n"
 		"Proxy format:\n"
 		"  http[s]://[user[:password]@]example.org[:port]\n"
 		"  socks4[a]://[user[:password]@]example.org[:port]\n"
 		"  socks5[h]://[user[:password]@]example.org[:port]\n"
-		"  ...other schemes and formats that used libcurl supports.\n",
+		"  ...and other schemes/formats libcurl supports.\n",
 		executable_path);
 }
 
