@@ -1,15 +1,20 @@
 OBJS = $(subst .cpp,.o,$(wildcard *.cpp))
 
-OUTPUT = ctrcdnfetch
+OUTPUT = ctrcdnfetch_debug
 LIBS = -lcurl -lssl -lcrypto -lz
 CXXFLAGS = -g -Wall -std=c++11
 CXX = g++
 STRIP = strip
-
-#wildcard on strip and rm because if it's a g++ for windows, it will add .exe
+CP = cp
+ZIP = zip
 
 all: $(OBJS)
 	$(CXX) -o "bin/$(OUTPUT)" $(OBJS) $(LIBS)
 
+release: all
+	$(CP) "bin/$(OUTPUT)" "bin/ctrcdnfetch"
+	$(STRIP) "bin/ctrcdnfetch"
+	$(ZIP) "bin/ctrcdnfetch.zip" "bin/$(OUTPUT)" "bin/ctrcdnfetch"
+
 clean:
-	rm -rf "bin/$(OUTPUT)"* $(OBJS)
+	rm  "bin/$(OUTPUT)"* $(OBJS) -rf
