@@ -41,7 +41,7 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 				manager.SetAttribute(DownloadManager::OUTPATH, "%s/tmd", outdir);
 		}
 
-		DownloadManager::Downloader tmddownloader = manager.GetDownloader(0);
+		DownloadManager::Downloader tmddownloader = manager.GetDownloader();
 
 		if (!tmddownloader.Download(0, write_opt_files))
 			throw std::runtime_error("Failed to download TMD");

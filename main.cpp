@@ -293,41 +293,41 @@ static void parse_args(struct arguments& args, int argc, char** argv)
 				case 'v':
 					{
 						if (!argv[i + 1] || !argv[i + 2])
-					{
-						strerr += "Argument ignored: v\n No more arguments.\n";
-						continue;
-					}
+						{
+							strerr += "Argument ignored: v\n No more arguments.\n";
+							continue;
+						}
 
-					if (!parse_a_title(strerr, args, argv[i + 2]))
-					{
-						i += 2;
+						if (!parse_a_title(strerr, args, argv[i + 2]))
+						{
+							i += 2;
+							
+							strerr += "Argument ignored: v\n Bad ticket path.\n";
+							continue;
+						}
 						
-						strerr += "Argument ignored: v\n Bad ticket path.\n";
-						continue;
-					}
-					
-					u32 version = strtoul(argv[i + 1], NULL, 0);
+						u32 version = strtoul(argv[i + 1], NULL, 0);
 
-					if (version > 0xffff)
-					{
-						args.files.pop_back();
+						if (version > 0xffff)
+						{
+							args.files.pop_back();
 
-						strerr += "Argument ignored: v\n Bad Version.\n Won't process:\n ";
-						strerr += argv[i + 2];
-						strerr += "\n";
+							strerr += "Argument ignored: v\n Bad Version.\n Won't process:\n ";
+							strerr += argv[i + 2];
+							strerr += "\n";
+
+							i += 2;
+							continue;
+						}
+
+						u32 idx = args.files.size() - 1;
+
+						args.files[idx].version = version;
+						args.files[idx].latest = false;
 
 						i += 2;
-						continue;
-					}
 
-					u32 idx = args.files.size() - 1;
-
-					args.files[idx].version = version;
-					args.files[idx].latest = false;
-
-					i += 2;
-
-					break;
+						break;
 					}
 				default:
 					strerr += "Argument ignored: ";
