@@ -422,12 +422,12 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 			return false;
 		}
 
-		char sha256_str[0x41], sha1_str[0x29], md5_str[0x21], hash_str[0xE0];
+		char sha256_str[0x41], sha1_str[0x29], md5_str[0x21], hash_str[0x100];
 
 		memset(sha256_str, 0, 0x41);
 		memset(sha1_str, 0, 0x29);
 		memset(md5_str, 0, 0x21);
-		memset(hash_str, 0, 0xE0);
+		memset(hash_str, 0, 0x100);
 
 		snbytes2hex(sha256_str, sha256, 0x20);
 		snbytes2hex(sha1_str, sha1, 0x14);
