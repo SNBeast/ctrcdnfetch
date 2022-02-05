@@ -179,7 +179,7 @@ int Utils::DirectoryManagement::DirectoryListing(DirFileList& output, const char
 
 	while ((ep = readdir(dp)))
 	{
-		if (!strcmp(ep->d_name, ".") || !strcmp(ep->d_name, "..")) continue;
+		if (strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0) continue;
 
 		DirFileList::entry* dir_entry = new(std::nothrow) DirFileList::entry();
 

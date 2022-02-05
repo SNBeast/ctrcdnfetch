@@ -193,7 +193,7 @@ static bool parse_a_title(std::string& strerr, struct arguments& args, char* arg
 
 	for (size_t foo = 0; foo < args.files.size(); foo++)
 	{
-		if (!strcmp(arg, args.files[foo].path))
+		if (strcmp(arg, args.files[foo].path) == 0)
 		{
 			found = true;
 			break;
@@ -348,7 +348,7 @@ static void parse_args(struct arguments& args, int argc, char** argv)
 			continue;
 		}
 
-		if (!strcmp(&argv[i][2], "proxy"))
+		if (strcmp(&argv[i][2], "proxy") == 0)
 		{
 			if (!argv[i + 1])
 			{
@@ -366,13 +366,13 @@ static void parse_args(struct arguments& args, int argc, char** argv)
 			continue;
 		}
 
-		if (!strcmp(&argv[i][2], "response"))
+		if (strcmp(&argv[i][2], "response") == 0)
 		{
 			args.printresponseheaders = true;
 			continue;
 		}
 
-		if (!strcmp(&argv[i][2], "hashes"))
+		if (strcmp(&argv[i][2], "hashes") == 0)
 		{
 			if (args.nodownload)
 			{
@@ -384,7 +384,7 @@ static void parse_args(struct arguments& args, int argc, char** argv)
 			continue;
 		}
 
-		if (!strcmp(&argv[i][2], "extra-files"))
+		if (strcmp(&argv[i][2], "extra-files") == 0)
 		{
 			if (args.nodownload)
 			{
@@ -396,7 +396,7 @@ static void parse_args(struct arguments& args, int argc, char** argv)
 			continue;
 		}
 
-		if (!strcmp(&argv[i][2], "no-download"))
+		if (strcmp(&argv[i][2], "no-download") == 0)
 		{
 			if (args.printhashes || args.writeextrafiles)
 			{
@@ -409,7 +409,7 @@ static void parse_args(struct arguments& args, int argc, char** argv)
 			continue;
 		}
 
-		if (!strcmp(&argv[i][2], "version"))
+		if (strcmp(&argv[i][2], "version") == 0)
 		{
 			if (!argv[i + 1] || !argv[i + 2])
 			{
@@ -448,7 +448,7 @@ static void parse_args(struct arguments& args, int argc, char** argv)
 			continue;
 		}
 
-		if (!strcmp(&argv[i][2], "help") || !strcmp(&argv[i][2], "usage"))
+		if (strcmp(&argv[i][2], "help") == 0 || strcmp(&argv[i][2], "usage") == 0)
 		{
 			args.printhelp = true;
 
