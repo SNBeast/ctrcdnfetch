@@ -80,13 +80,9 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 				if (!downloader.Download(content_size, write_opt_files) && !nodownload)
 				{
 					if (downloader.GetCurlResult() == CURLE_HTTP_RETURNED_ERROR)
-					{
 						printf("Failed downloading content [HTTP Status Code %ld] %08x (try %u / 3)\n", downloader.GetStatusCode(), id, ++tries);
-					}
 					else 
-					{
 						printf("Failed downloading content [CURL Result \"%s\"] %08x (try %u / 3)\n", curl_easy_strerror(downloader.GetCurlResult()), id, ++tries);
-					}
 					
 					continue;
 				}
@@ -103,15 +99,40 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 
 				// outdir len + "/" (1) + content id (8) + "_" (1) + "unavailable" (11) + \0 (1)
 				size_t len = strlen(outdir) + 1 + 8 + 1 + 11 + 1;
-				char unavail_path[len]; //base path len + content id len + 1
+
+				char *unavail_path = (char *)malloc(len);
+
+				if (!unavail_path)
+					throw std::bad_alloc();
+
 				snprintf(unavail_path, len, "%s/%08x_unavailable", outdir, id);
 
 				FILE* unavail_file = fopen(unavail_path, "w");
+				free(unavail_path);
 				fclose(unavail_file);
 			}
 
 			tries = 0;
 		}
+
+		//                     outdir len    + / + tid + . + txt + \0
+		int tidfile_pathlen = strlen(outdir) + 1 + 3   + 1 + 3   + 1;
+
+		char *tidfile_path = (char *)malloc(tidfile_pathlen);
+
+		if (!tidfile_path)
+			throw std::runtime_error("Could not allocate memory for tid.txt file path");
+
+		snprintf(tidfile_path, tidfile_pathlen, "%s/tid.txt", outdir);
+
+		FILE *f = fopen(tidfile_path, "w");
+		free(tidfile_path);
+
+		if (!f)
+			throw std::runtime_error("Failed to open tid.txt file in output directory");
+
+		fprintf(f, "%016llX\n", (unsigned long long)GetTitleId());
+		fclose(f);
 	}
 	catch (...)
 	{

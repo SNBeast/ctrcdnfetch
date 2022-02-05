@@ -302,11 +302,22 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 			// path length + 1 (underscore) + 7 ("headers") + 1 (period) + 3 ("txt") + 1 (NULL terminator)
 			int hdrfile_pathlen = strlen(outpath) + 1 + 7 + 1 + 3 + 1;
 
-			char headerfile_path[hdrfile_pathlen];
+			char *headerfile_path = (char *)malloc(hdrfile_pathlen);
+
+			if (!headerfile_path)
+			{
+				free(header_data.buffer);
+
+				header_data.buffer = NULL;
+				header_data.size = 0;
+
+				throw std::bad_alloc();
+			}
 
 			snprintf(headerfile_path, hdrfile_pathlen, "%s_headers.txt", outpath);
 
 			FILE* hdrfile = fopen(headerfile_path, "w");
+			free(headerfile_path);
 
 			if (!hdrfile || fwrite(header_data.buffer, 1, header_data.size, hdrfile) != header_data.size)
 			{
@@ -451,11 +462,15 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 			// path length + 1 (underscore) + 6 ("hashes") + 1 (period) + 3 ("txt") + 1 (NULL terminator)
 			int hashfile_pathlen = strlen(outpath) + 1 + 6 + 1 + 3 + 1;
 
-			char hashfile_path[hashfile_pathlen];
+			char *hashfile_path = (char *)malloc(hashfile_pathlen);
+
+			if (!hashfile_path)
+				throw std::bad_alloc();
 
 			snprintf(hashfile_path, hashfile_pathlen, "%s_hashes.txt", outpath);
 
 			FILE* hashfile = fopen(hashfile_path, "w");
+			free(hashfile_path);
 
 			if (!hashfile)
 			{
