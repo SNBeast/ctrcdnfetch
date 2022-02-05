@@ -463,7 +463,7 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 				return false;
 			}
 
-			fwrite(hash_str, 1, 0xBC, hashfile);
+			fwrite(hash_str, 1, strlen(hash_str), hashfile);
 			fclose(hashfile);
 		}
 	}
