@@ -115,23 +115,27 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 			tries = 0;
 		}
 
+		time_t t = time(NULL);
+		struct tm *tm = gmtime(&t);
+
 		//                     outdir len    + / + tid + . + txt + \0
-		int tidfile_pathlen = strlen(outdir) + 1 + 3   + 1 + 3   + 1;
+		int tidfile_pathlen = strlen(outdir) + 1 + 4   + 1 + 3   + 1;
 
 		char *tidfile_path = (char *)malloc(tidfile_pathlen);
 
 		if (!tidfile_path)
-			throw std::runtime_error("Could not allocate memory for tid.txt file path");
+			throw std::runtime_error("Could not allocate memory for info.txt file path");
 
-		snprintf(tidfile_path, tidfile_pathlen, "%s/tid.txt", outdir);
+		snprintf(tidfile_path, tidfile_pathlen, "%s/info.txt", outdir);
 
 		FILE *f = fopen(tidfile_path, "w");
 		free(tidfile_path);
 
 		if (!f)
-			throw std::runtime_error("Failed to open tid.txt file in output directory");
+			throw std::runtime_error("Failed to open info.txt file in output directory");
 
 		fprintf(f, "%016llX\n", (unsigned long long)GetTitleId());
+		fprintf(f, "%04d-%02d-%02d\n", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
 		fclose(f);
 	}
 	catch (...)
