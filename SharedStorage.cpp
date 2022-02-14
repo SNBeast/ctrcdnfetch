@@ -5,7 +5,8 @@
 #include "SharedStorage.hpp"
 #include "DirectoryManagement.hpp"
 
-namespace {
+namespace
+{
 	struct storage
 	{
 		const char* const path;
@@ -131,7 +132,8 @@ int NintendoData::SharedStorage::Load(FILE*& out, const char* file) noexcept
 	return errno = err;
 }
 
-int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* file) noexcept {
+int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* file) noexcept
+{
 	if (!file || (!in && inlen)) return errno = EFAULT;
 	if (!file[0]) return errno = EINVAL;
 
@@ -153,98 +155,26 @@ int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* 
 
 	err = 0;
 
-	char* filepathcopy = (char*)malloc(strlen(file) + 1);
-
-	if (!filepathcopy) return errno = ENOMEM;
-
-	strcpy(filepathcopy, file);
-
-	char* str = filepathcopy;
-	char* part1 = NULL;
-	char* part2 = NULL;
-	char* save = NULL;
-
-	char* dirpath = (char*)malloc(1);
-	*dirpath = '\0';
-
-	size_t currentsize = 1; //start at one because will refer to null.
-
-	if (!dirpath)
-	{
-		free(filepathcopy);
-		return errno = ENOMEM;
-	}
-
-	for (;; str = NULL) {
-		part1 = strtok_r(str, "/", &save);
-
-		if (!part1) break;
-		if (part2)
-		{
-			currentsize += 1 + strlen(part2); // a / and the string
-
-			char* tmp = (char*)realloc(dirpath, currentsize);
-
-			if (!tmp)
-			{
-				free(dirpath);
-				free(filepathcopy);
-				return errno = ENOMEM;
-			}
-
-			dirpath = tmp;
-			snprintf(dirpath, currentsize, "/%s", part2);
-		}
-		part2 = part1;
-	}
-
-	free(filepathcopy);
-
 	char* storagepath = NULL;
 
 	if ((err = storages[i].getfullpath(storagepath)) != 0)
-	{
-		free(dirpath);
 		return errno = err;
-	}
 
-	size_t length = snprintf(NULL, 0, "%s%s", storagepath, dirpath) + 1;
-
-	char* fullpath = (char*)malloc(length);
-
-	if (!fullpath)
-	{
-		free(storagepath);
-		free(dirpath);
-		return errno = ENOMEM;
-	}
-
-	snprintf(fullpath, length, "%s%s", storagepath, dirpath);
-
-	free(dirpath);
-
-	err = Utils::DirectoryManagement::MakeDirectory(fullpath);
-
-	free(fullpath);
-
-	if (err)
+	if((err = Utils::DirectoryManagement::MakeDirectory(storagepath)) != 0)
 	{
 		free(storagepath);
 		return errno = err;
 	}
 
-	length = snprintf(NULL, 0, "%s/%s", storagepath, file) + 1;
-
-	fullpath = (char*)malloc(length);
-
-	if (!fullpath)
+	size_t fullpath_len = strlen(storagepath) + strlen(file) + 2;
+	char *fullpath = (char *) malloc(fullpath_len);
+	if(!fullpath)
 	{
 		free(storagepath);
 		return errno = ENOMEM;
 	}
 
-	snprintf(fullpath, length, "%s/%s", storagepath, file);
-
+	snprintf(fullpath, fullpath_len, "%s/%s", storagepath, file);
 	free(storagepath);
 
 	FILE* fp = fopen(fullpath, "wb");
@@ -253,7 +183,8 @@ int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* 
 	if (inlen)
 	{
 		fwrite(in, inlen, 1, fp);
-		if (fflush(fp) != 0) {
+		if (fflush(fp) != 0)
+		{
 			err = errno;
 			fclose(fp);
 			remove(fullpath);
