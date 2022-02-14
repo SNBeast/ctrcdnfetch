@@ -118,8 +118,8 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 		time_t t = time(NULL);
 		struct tm *tm = gmtime(&t);
 
-		//                     outdir len    + / + tid + . + txt + \0
-		int tidfile_pathlen = strlen(outdir) + 1 + 4   + 1 + 3   + 1;
+		//                    outdir len     + / + info + . + txt + \0
+		int tidfile_pathlen = strlen(outdir) + 1 + 4    + 1 + 3   + 1;
 
 		char *tidfile_path = (char *)malloc(tidfile_pathlen);
 
