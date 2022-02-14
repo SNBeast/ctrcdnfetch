@@ -54,8 +54,6 @@ static void load_certs(u8*& out_certs, const char* proxy)
 		if (fp) fclose(fp);
 		if (data && read == 1792 && !memcmp(expecteddigest, digest, SHA256_DIGEST_LENGTH)) break;
 
-		free(data);
-
 		u8* ticket = NULL;
 
 		try

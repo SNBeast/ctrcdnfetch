@@ -165,6 +165,7 @@ int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* 
 	char* save = NULL;
 
 	char* dirpath = (char*)malloc(1);
+	*dirpath = '\0';
 
 	size_t currentsize = 1; //start at one because will refer to null.
 
@@ -192,8 +193,7 @@ int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* 
 			}
 
 			dirpath = tmp;
-			strcat(dirpath, "/");
-			strcat(dirpath, part2);
+			snprintf(dirpath, currentsize, "/%s", part2);
 		}
 		part2 = part1;
 	}
