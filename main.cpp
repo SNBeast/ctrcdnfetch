@@ -30,7 +30,13 @@ struct arguments
 static void load_certs(u8*& out_certs, const char* proxy)
 {
 	// DC153C2B8A0AC874A9DC78610E6A8FE3E6B134D5528873C961FBC795CB47E697
-	static const u8 expecteddigest[SHA256_DIGEST_LENGTH] = { 0xDC, 0x15, 0x3C, 0x2B, 0x8A, 0x0A, 0xC8, 0x74, 0xA9, 0xDC, 0x78, 0x61, 0x0E, 0x6A, 0x8F, 0xE3, 0xE6, 0xB1, 0x34, 0xD5, 0x52, 0x88, 0x73, 0xC9, 0x61, 0xFB, 0xC7, 0x95, 0xCB, 0x47, 0xE6, 0x97 };
+	static const u8 expecteddigest[SHA256_DIGEST_LENGTH] =
+	{
+		0xDC, 0x15, 0x3C, 0x2B, 0x8A, 0x0A, 0xC8, 0x74,
+		0xA9, 0xDC, 0x78, 0x61, 0x0E, 0x6A, 0x8F, 0xE3,
+		0xE6, 0xB1, 0x34, 0xD5, 0x52, 0x88, 0x73, 0xC9,
+		0x61, 0xFB, 0xC7, 0x95, 0xCB, 0x47, 0xE6, 0x97
+	};
 
 	u8 digest[SHA256_DIGEST_LENGTH];
 
@@ -45,7 +51,7 @@ static void load_certs(u8*& out_certs, const char* proxy)
 			if (NintendoData::SharedStorage::Load(fp, "CA00000003-XS0000000c.bin"))
 				break;
 
-			data = (u8*)malloc(1792);
+			data = (u8 *)malloc(1792);
 
 			if (!data) break;
 			if ((read = fread(data, 1, 1792, fp)) == 1792) SHA256(data, 1792, digest);
@@ -58,7 +64,7 @@ static void load_certs(u8*& out_certs, const char* proxy)
 
 		try
 		{
-			if (!data) data = (u8*)malloc(1792);
+			if (!data) data = (u8 *)malloc(1792);
 			if (!data) break;
 
 			DownloadManager manager;
@@ -78,7 +84,7 @@ static void load_certs(u8*& out_certs, const char* proxy)
 
 			size_t tiklen = 0;
 
-			ticket = (u8*)downloader.GetBufferAndDetach(tiklen);
+			ticket = (u8 *)downloader.GetBufferAndDetach(tiklen);
 
 			if (!ticket || !tiklen)
 			{
@@ -98,7 +104,7 @@ static void load_certs(u8*& out_certs, const char* proxy)
 
 			SHA256(certs, 1792, digest);
 
-			if (memcmp(expecteddigest, digest, SHA256_DIGEST_LENGTH))
+			if (memcmp(expecteddigest, digest, SHA256_DIGEST_LENGTH) != 0)
 			{
 				free(ticket);
 				break;
@@ -496,7 +502,7 @@ int main(int argc, char** argv)
 
 	std::vector<u64> processedtids;
 
-	u8* tikbuffer = (u8*)malloc(848);
+	u8* tikbuffer = (u8 *)malloc(848);
 	u8* certs = NULL;
 
 	try
@@ -575,7 +581,7 @@ int main(int argc, char** argv)
 
 			if (!args.nodownload)
 			{
-				outpath = (char*)malloc(16 + 1);
+				outpath = (char *)malloc(16 + 1);
 
 				if (!outpath)
 					throw std::bad_alloc();

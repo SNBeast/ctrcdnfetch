@@ -39,7 +39,7 @@ int DownloadManager::Downloader::xferinfo(void* p, curl_off_t dltotal, curl_off_
 {
 	UNUSED(ultotal); UNUSED(ulnow); //build warning suppression
 
-	struct progress_data* progress = (struct progress_data*)p;
+	struct progress_data* progress = (struct progress_data *)p;
 
 	if ((dlnow - progress->last_print_value >= 20480 || dlnow == dltotal) && progress->last_print_value != dlnow)
 	{
@@ -58,7 +58,7 @@ int DownloadManager::Downloader::xferinfo(void* p, curl_off_t dltotal, curl_off_
 
 size_t DownloadManager::Downloader::write_data(void* ptr, size_t size, size_t nmemb, void* data)
 {
-	Downloader* _this = (Downloader*)data;
+	Downloader* _this = (Downloader *)data;
 	size_t realsize = size * nmemb;
 	u64 totalsize = _this->downloaded + realsize;
 
@@ -70,7 +70,7 @@ size_t DownloadManager::Downloader::write_data(void* ptr, size_t size, size_t nm
 	{
 		if (_this->buffer_data.size != totalsize) //incase this function is called when realsize = 0
 		{
-			u8* buffer = (u8*)realloc(_this->buffer_data.buffer, totalsize);
+			u8* buffer = (u8 *)realloc(_this->buffer_data.buffer, totalsize);
 
 			if (!buffer)
 			{
@@ -83,7 +83,7 @@ size_t DownloadManager::Downloader::write_data(void* ptr, size_t size, size_t nm
 
 			_this->buffer_data.buffer = buffer;
 
-			memcpy((void*)(&((char*)_this->buffer_data.buffer)[_this->buffer_data.size]), ptr, realsize);
+			memcpy((void *)(&((char *)_this->buffer_data.buffer)[_this->buffer_data.size]), ptr, realsize);
 
 			_this->buffer_data.size = totalsize;
 
@@ -101,14 +101,14 @@ size_t DownloadManager::Downloader::write_data(void* ptr, size_t size, size_t nm
 
 size_t DownloadManager::Downloader::headerprint(void* ptr, size_t size, size_t nmemb, void* data)
 {
-	Downloader* _this = (Downloader*)data;
+	Downloader* _this = (Downloader *)data;
 	size_t realsize = size * nmemb;
 	size_t totalsize = _this->header_data.size + realsize;
 
 	if (_this->header_data.size == totalsize) //incase this function is called when realsize = 0
 		return 0;
 
-	u8* buffer = (u8*)realloc(_this->header_data.buffer, totalsize);
+	u8* buffer = (u8 *)realloc(_this->header_data.buffer, totalsize);
 
 	if (!buffer)
 	{
@@ -121,7 +121,7 @@ size_t DownloadManager::Downloader::headerprint(void* ptr, size_t size, size_t n
 
 	_this->header_data.buffer = buffer;
 
-	memcpy((void*)(&((char*)_this->header_data.buffer)[_this->header_data.size]), ptr, realsize);
+	memcpy((void *)(&((char *)_this->header_data.buffer)[_this->header_data.size]), ptr, realsize);
 
 	_this->header_data.size = totalsize;
 
@@ -144,7 +144,8 @@ DownloadManager::Downloader::Downloader() :
 	printheaders(false),
 	printhashes(false),
 	limiteddownload(false)
-{}
+{
+}
 
 DownloadManager::Downloader::Downloader(DownloadManager& data, u64 expected_size, bool write_opt_files) : Downloader()
 {
@@ -225,7 +226,7 @@ DownloadManager::Downloader::Downloader(DownloadManager& data, u64 expected_size
 
 DownloadManager::Downloader::~Downloader()
 {
-	free((void*)progress.filename);
+	free((void *)progress.filename);
 	free(outpath);
 	free(buffer_data.buffer);
 
@@ -296,7 +297,7 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 		fwrite(header_data.buffer, header_data.size, 1, stdout);
 		fflush(stdout);
 
-		if (write_opt_files)
+		if (write_opt_files && outpath)
 		{
 			// {path}_headers.txt
 			// path length + 1 (underscore) + 7 ("headers") + 1 (period) + 3 ("txt") + 1 (NULL terminator)
@@ -398,7 +399,7 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 				return false;
 			}
 
-			crc = crc32(crc, (const Bytef*)buf, to_read);
+			crc = crc32(crc, (const Bytef *)buf, to_read);
 
 			if (
 				!SHA256_Update(&sha256ctx, buf, to_read) ||
@@ -456,7 +457,7 @@ bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_fil
 
 		printf("Hashes: \n\n%s\n", hash_str);
 
-		if (write_opt_files)
+		if (write_opt_files && outpath)
 		{
 			// {path}_hashes.txt
 			// path length + 1 (underscore) + 6 ("hashes") + 1 (period) + 3 ("txt") + 1 (NULL terminator)
@@ -568,7 +569,7 @@ DownloadManager& DownloadManager::SetAttribute(DownloadManager::Strtype type, co
 
 		if (len <= 1) break;
 
-		char* newdata = (char*)calloc(len, 1);
+		char* newdata = (char *)calloc(len, 1);
 
 		if (!newdata) break;
 
@@ -807,7 +808,7 @@ void DownloadManager::SetGlobalProxy(const char* proxy)
 
 	if (proxy)
 	{
-		tmp = (char*)malloc(strlen(proxy) + 1);
+		tmp = (char *)malloc(strlen(proxy) + 1);
 
 		if (!tmp) throw std::bad_alloc();
 

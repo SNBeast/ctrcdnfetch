@@ -27,7 +27,7 @@ namespace Utils
 				{
 					if (this != &other)
 					{
-						char* tmpname = (char*)malloc(strlen(other.name) + 1);
+						char* tmpname = (char *)malloc(strlen(other.name) + 1);
 
 						if (!tmpname) throw std::bad_alloc();
 
@@ -83,7 +83,7 @@ namespace Utils
 				{
 					Clear();
 
-					char* new_path = (char*)malloc(strlen(other.original_path) + 1);
+					char* new_path = (char *)malloc(strlen(other.original_path) + 1);
 
 					if (!new_path) throw std::bad_alloc();
 

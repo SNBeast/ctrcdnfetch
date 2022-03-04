@@ -37,24 +37,24 @@ namespace Endian {
 u16 Endian::Be16(const u16* value) noexcept {
 	u16 _value;
 	memcpy(&_value, value, sizeof(u16));
-	if(check.is_little) {
+	if (check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap16(_value);
 		#else
 		u16 tmp = _value;
-		for(int i = 0; i < sizeof(u16); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
+		for(int i = 0; i < sizeof(u16); i++) ((u8 *)&_value)[i] = ((u8 *)&tmp)[sizeof(u16)-1-i];
 		#endif
 	}
 	return _value;
 }
 
 u16 Endian::Be16(u16 value) noexcept {
-	if(check.is_little) {
+	if (check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap16(value);
 		#else
 		u16 tmp = value;
-		for(int i = 0; i < sizeof(u16); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
+		for(int i = 0; i < sizeof(u16); i++) ((u8 *)&value)[i] = ((u8 *)&tmp)[sizeof(u16)-1-i];
 		#endif
 	}
 	return value;
@@ -63,24 +63,24 @@ u16 Endian::Be16(u16 value) noexcept {
 u32 Endian::Be32(const u32* value) noexcept {
 	u32 _value;
 	memcpy(&_value, value, sizeof(u32));
-	if(check.is_little) {
+	if (check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap32(_value);
 		#else
 		u32 tmp = _value;
-		for(int i = 0; i < sizeof(u32); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
+		for(int i = 0; i < sizeof(u32); i++) ((u8 *)&_value)[i] = ((u8 *)&tmp)[sizeof(u32)-1-i];
 		#endif
 	}
 	return _value;
 }
 
 u32 Endian::Be32(u32 value) noexcept {
-	if(check.is_little) {
+	if (check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap32(value);
 		#else
 		u32 tmp = value;
-		for(int i = 0; i < sizeof(u32); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
+		for(int i = 0; i < sizeof(u32); i++) ((u8 *)&value)[i] = ((u8 *)&tmp)[sizeof(u32)-1-i];
 		#endif
 	}
 	return value;
@@ -89,24 +89,24 @@ u32 Endian::Be32(u32 value) noexcept {
 u64 Endian::Be64(const u64* value) noexcept {
 	u64 _value;
 	memcpy(&_value, value, sizeof(u64));
-	if(check.is_little) {
+	if (check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap64(_value);
 		#else
 		u64 tmp = _value;
-		for(int i = 0; i < sizeof(u64); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
+		for(int i = 0; i < sizeof(u64); i++) ((u8 *)&_value)[i] = ((u8 *)&tmp)[sizeof(u64)-1-i];
 		#endif
 	}
 	return _value;
 }
 
 u64 Endian::Be64(u64 value) noexcept {
-	if(check.is_little) {
+	if (check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap64(value);
 		#else
 		u64 tmp = value;
-		for(int i = 0; i < sizeof(u64); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
+		for(int i = 0; i < sizeof(u64); i++) ((u8 *)&value)[i] = ((u8 *)&tmp)[sizeof(u64)-1-i];
 		#endif
 	}
 	return value;
@@ -115,24 +115,24 @@ u64 Endian::Be64(u64 value) noexcept {
 u16 Endian::Le16(const u16* value) noexcept {
 	u16 _value;
 	memcpy(&_value, value, sizeof(u16));
-	if(!check.is_little) {
+	if (!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap16(_value);
 		#else
 		u16 tmp = _value;
-		for(int i = 0; i < sizeof(u16); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
+		for(int i = 0; i < sizeof(u16); i++) ((u8 *)&_value)[i] = ((u8 *)&tmp)[sizeof(u16)-1-i];
 		#endif
 	}
 	return _value;
 }
 
 u16 Endian::Le16(u16 value) noexcept {
-	if(!check.is_little) {
+	if (!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap16(value);
 		#else
 		u16 tmp = value;
-		for(int i = 0; i < sizeof(u16); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u16)-1-i];
+		for(int i = 0; i < sizeof(u16); i++) ((u8 *)&value)[i] = ((u8 *)&tmp)[sizeof(u16)-1-i];
 		#endif
 	}
 	return value;
@@ -141,24 +141,24 @@ u16 Endian::Le16(u16 value) noexcept {
 u32 Endian::Le32(const u32* value) noexcept {
 	u32 _value;
 	memcpy(&_value, value, sizeof(u32));
-	if(!check.is_little) {
+	if (!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap32(_value);
 		#else
 		u32 tmp = _value;
-		for(int i = 0; i < sizeof(u32); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
+		for(int i = 0; i < sizeof(u32); i++) ((u8 *)&_value)[i] = ((u8 *)&tmp)[sizeof(u32)-1-i];
 		#endif
 	}
 	return _value;
 }
 
 u32 Endian::Le32(u32 value) noexcept {
-	if(!check.is_little) {
+	if (!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap32(value);
 		#else
 		u32 tmp = value;
-		for(int i = 0; i < sizeof(u32); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u32)-1-i];
+		for(int i = 0; i < sizeof(u32); i++) ((u8 *)&value)[i] = ((u8 *)&tmp)[sizeof(u32)-1-i];
 		#endif
 	}
 	return value;
@@ -167,24 +167,24 @@ u32 Endian::Le32(u32 value) noexcept {
 u64 Endian::Le64(const u64* value) noexcept {
 	u64 _value;
 	memcpy(&_value, value, sizeof(u64));
-	if(!check.is_little) {
+	if (!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		_value = __builtin_bswap64(_value);
 		#else
 		u64 tmp = _value;
-		for(int i = 0; i < sizeof(u64); i++) ((u8*)&_value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
+		for(int i = 0; i < sizeof(u64); i++) ((u8 *)&_value)[i] = ((u8 *)&tmp)[sizeof(u64)-1-i];
 		#endif
 	}
 	return _value;
 }
 
 u64 Endian::Le64(u64 value) noexcept {
-	if(!check.is_little) {
+	if (!check.is_little) {
 		#if defined __clang__ || defined __GNUC__
 		value = __builtin_bswap64(value);
 		#else
 		u64 tmp = value;
-		for(int i = 0; i < sizeof(u64); i++) ((u8*)&value)[i] = ((u8*)&tmp)[sizeof(u64)-1-i];
+		for(int i = 0; i < sizeof(u64); i++) ((u8 *)&value)[i] = ((u8 *)&tmp)[sizeof(u64)-1-i];
 		#endif
 	}
 	return value;

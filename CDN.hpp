@@ -11,9 +11,12 @@ namespace NintendoData
 	private:
 		Ticket tik;
 		DownloadManager manager;
+		
 		u16 version;
+
 		bool set_version;
 		bool nodownload;
+
 	public:
 		template<typename... Args> CDN& SetProxy(const char* str, Args... args) noexcept
 		{

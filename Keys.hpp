@@ -20,12 +20,12 @@ namespace NintendoData {
 		bool CTRScrambler(u8* outnormal, const u8* KeyX, const u8* KeyY);
 		bool Scrambler(u8* outnormal, int keyslotX, const u8* keyY, bool retail = true) {
 			u8 key[16];
-			if(keyslotX < 4) return TWLScrambler(outnormal, Storage::GetKeyX(key, keyslotX, retail), keyY);
+			if (keyslotX < 4) return TWLScrambler(outnormal, Storage::GetKeyX(key, keyslotX, retail), keyY);
 			else return CTRScrambler(outnormal, Storage::GetKeyX(key, keyslotX, retail), keyY);
 		}
 		bool Scrambler(u8* outnormal, const u8* keyX, int keyslotY, bool retail = true) {
 			u8 key[16];
-			if(keyslotY < 4) return TWLScrambler(outnormal, keyX, Storage::GetKeyY(key, keyslotY, retail));
+			if (keyslotY < 4) return TWLScrambler(outnormal, keyX, Storage::GetKeyY(key, keyslotY, retail));
 			else return CTRScrambler(outnormal, keyX, Storage::GetKeyY(key, keyslotY, retail));
 		}
 		bool ScrambleCommon(u8* outnormal, int index, bool retail = true) {

@@ -28,7 +28,7 @@ int Utils::DirectoryManagement::MakeDirectory(const char* path, bool recursive)
 
 	if (recursive)
 	{
-		char* copypath = (char*)calloc(strlen(path) + 1, 1);
+		char* copypath = (char *)calloc(strlen(path) + 1, 1);
 
 		if (!copypath) return errno = ENOMEM;
 
@@ -191,7 +191,7 @@ int Utils::DirectoryManagement::DirectoryListing(DirFileList& output, const char
 
 		size_t length = strlen(ep->d_name) + 1;
 
-		dir_entry->name = (char*)malloc(length);
+		dir_entry->name = (char *)malloc(length);
 
 		if (!dir_entry->name)
 		{
@@ -270,7 +270,7 @@ int Utils::DirectoryManagement::FixUpPath(char*& out, const char* path, bool end
 
 	if (path[0] == '/' || path[0] == '\\') fixedpath += '/';
 
-	char* copypath = (char*)malloc(strlen(path) + 1);
+	char* copypath = (char *)malloc(strlen(path) + 1);
 
 	if (!copypath) return errno = ENOMEM;
 
@@ -296,7 +296,7 @@ int Utils::DirectoryManagement::FixUpPath(char*& out, const char* path, bool end
 
 		if (!ending_delimitor) fixedpath.pop_back();
 
-		tmp = (char*)malloc(fixedpath.size() + 1);
+		tmp = (char *)malloc(fixedpath.size() + 1);
 
 		if (!tmp)
 		{

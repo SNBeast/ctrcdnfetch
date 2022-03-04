@@ -19,7 +19,7 @@ namespace
 
 			size_t length = snprintf(NULL, 0, path, home_dir) + 1;
 
-			fullpath = (char*)malloc(length);
+			fullpath = (char *)malloc(length);
 
 			if (!fullpath) return errno = ENOMEM;
 
@@ -94,7 +94,7 @@ int NintendoData::SharedStorage::Load(FILE*& out, const char* file) noexcept
 
 		size_t length = snprintf(NULL, 0, "%s/%s", fullstoragepath, file) + 1;
 
-		char* fullpath = (char*)malloc(length);
+		char* fullpath = (char *)malloc(length);
 
 		if (!fullpath)
 		{
@@ -160,7 +160,7 @@ int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* 
 	if ((err = storages[i].getfullpath(storagepath)) != 0)
 		return errno = err;
 
-	if((err = Utils::DirectoryManagement::MakeDirectory(storagepath)) != 0)
+	if ((err = Utils::DirectoryManagement::MakeDirectory(storagepath)) != 0)
 	{
 		free(storagepath);
 		return errno = err;
@@ -168,7 +168,7 @@ int NintendoData::SharedStorage::Save(const void* in, size_t inlen, const char* 
 
 	size_t fullpath_len = strlen(storagepath) + strlen(file) + 2;
 	char *fullpath = (char *) malloc(fullpath_len);
-	if(!fullpath)
+	if (!fullpath)
 	{
 		free(storagepath);
 		return errno = ENOMEM;

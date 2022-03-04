@@ -156,16 +156,16 @@ namespace {
 	static bool LoadBoot9Protected(FILE* fp) {
 		bool success = false;
 		auto startoffset = ftell(fp);
-		if(startoffset == -1L) return false;
+		if (startoffset == -1L) return false;
 		do {
-			if(fseek(fp, 0x59D0, SEEK_CUR)) break;
-			if(fread(&Retail::KeyXs[0][0], 1, 128, fp) != 128) break;
-			if(fread(&Retail::KeyYs[0][0], 1, 128, fp) != 128) break;
-			if(fread(&Retail::KeyNormals[0][0], 1, 320, fp) != 320) break;
-			if(fseek(fp, 0x1C0, SEEK_CUR)) break;
-			if(fread(&Dev::KeyXs[0][0], 1, 128, fp) != 128) break;
-			if(fread(&Dev::KeyYs[0][0], 1, 128, fp) != 128) break;
-			if(fread(&Dev::KeyNormals[0][0], 1, 320, fp) != 320) break;
+			if (fseek(fp, 0x59D0, SEEK_CUR)) break;
+			if (fread(&Retail::KeyXs[0][0], 1, 128, fp) != 128) break;
+			if (fread(&Retail::KeyYs[0][0], 1, 128, fp) != 128) break;
+			if (fread(&Retail::KeyNormals[0][0], 1, 320, fp) != 320) break;
+			if (fseek(fp, 0x1C0, SEEK_CUR)) break;
+			if (fread(&Dev::KeyXs[0][0], 1, 128, fp) != 128) break;
+			if (fread(&Dev::KeyYs[0][0], 1, 128, fp) != 128) break;
+			if (fread(&Dev::KeyNormals[0][0], 1, 320, fp) != 320) break;
 
 			/* 
 			 * It's either make code that reads from a special file with just the other keys,
@@ -449,60 +449,60 @@ namespace {
 			bool checkpass = true;
 			for(int i = 0; checkpass && i < 8; i++) {
 				SHA1(Retail::KeyXs[i], 16, shabuf);
-				if(memcmp(shabuf, Retail::SHA1Checksums::KeyXs[i], 20)) {
+				if (memcmp(shabuf, Retail::SHA1Checksums::KeyXs[i], 20) != 0) {
 					checkpass = false;
 					break;
 				}
 				SHA1(Retail::KeyYs[i], 16, shabuf);
-				if(memcmp(shabuf, Retail::SHA1Checksums::KeyYs[i], 20)) {
+				if (memcmp(shabuf, Retail::SHA1Checksums::KeyYs[i], 20) != 0) {
 					checkpass = false;
 					break;
 				}
 				SHA1(Dev::KeyXs[i], 16, shabuf);
-				if(memcmp(shabuf, Dev::SHA1Checksums::KeyXs[i], 20)) {
+				if (memcmp(shabuf, Dev::SHA1Checksums::KeyXs[i], 20) != 0) {
 					checkpass = false;
 					break;
 				}
 				SHA1(Dev::KeyYs[i], 16, shabuf);
-				if(memcmp(shabuf, Dev::SHA1Checksums::KeyYs[i], 20))
+				if (memcmp(shabuf, Dev::SHA1Checksums::KeyYs[i], 20) != 0)
 					checkpass = false;
 			}
 			for(int i = 0; checkpass && i < 20; i++) {
 				SHA1(Retail::KeyNormals[i], 16, shabuf);
-				if(memcmp(shabuf, Retail::SHA1Checksums::KeyNormals[i], 20)) {
+				if (memcmp(shabuf, Retail::SHA1Checksums::KeyNormals[i], 20) != 0) {
 					checkpass = false;
 					break;
 				}
 				SHA1(Dev::KeyNormals[i], 16, shabuf);
-				if(memcmp(shabuf, Dev::SHA1Checksums::KeyNormals[i], 20))
+				if (memcmp(shabuf, Dev::SHA1Checksums::KeyNormals[i], 20) != 0)
 					checkpass = false;
 			}
 			for(int i = 0; checkpass && i < 3; i++) {
 				SHA1(Retail::NCCHKeys[i], 16, shabuf);
-				if(memcmp(shabuf, Retail::SHA1Checksums::NCCHKeys[i], 20)) {
+				if (memcmp(shabuf, Retail::SHA1Checksums::NCCHKeys[i], 20) != 0) {
 					checkpass = false;
 					break;
 				}
 				SHA1(Dev::NCCHKeys[i], 16, shabuf);
-				if(memcmp(shabuf, Dev::SHA1Checksums::NCCHKeys[i], 20))
+				if (memcmp(shabuf, Dev::SHA1Checksums::NCCHKeys[i], 20) != 0)
 					checkpass = false;
 			}
 			for(int i = 0; checkpass && i < 5; i++) {
 				SHA1(CommonKeys[i], 16, shabuf);
-				if(memcmp(shabuf, SHA1Checksums::CommonKeys[i], 20))
+				if (memcmp(shabuf, SHA1Checksums::CommonKeys[i], 20) != 0)
 					checkpass = false;
 			}
-			if(!checkpass) break;
+			if (!checkpass) break;
 			SHA1(Retail::CommonKey0, 16, shabuf);
-			if(memcmp(shabuf, Retail::SHA1Checksums::CommonKey0, 20)) break;
+			if (memcmp(shabuf, Retail::SHA1Checksums::CommonKey0, 20) != 0) break;
 			SHA1(Dev::CommonKey0, 16, shabuf);
-			if(memcmp(shabuf, Dev::SHA1Checksums::CommonKey0, 20)) break;
+			if (memcmp(shabuf, Dev::SHA1Checksums::CommonKey0, 20) != 0) break;
 			SHA1(Constant_C, 16, shabuf);
-			if(memcmp(shabuf, SHA1Checksums::Constant_C, 20)) break;
+			if (memcmp(shabuf, SHA1Checksums::Constant_C, 20) != 0) break;
 			SHA1(TWLConstant, 16, shabuf);
-			if(memcmp(shabuf, SHA1Checksums::TWLConstant, 20)) break;
+			if (memcmp(shabuf, SHA1Checksums::TWLConstant, 20) != 0) break;
 			SHA1(FixedKey, 16, shabuf);
-			if(memcmp(shabuf, SHA1Checksums::FixedKey, 20)) break;
+			if (memcmp(shabuf, SHA1Checksums::FixedKey, 20) != 0) break;
 			success = true;
 		} while(0);
 		fseek(fp, startoffset, SEEK_SET);
@@ -515,20 +515,20 @@ bool NintendoData::KeyUtils::Storage::ReloadStorage() {
 	try {
 		readwritelock.lock();
 	} catch(...) {return loaded;}
-	if(loaded) {
+	if (loaded) {
 		readwritelock.unlock();
 		return loaded;
 	}
-	if(!NintendoData::SharedStorage::Load(fp, "boot9.bin")) {
-		if(!fseek(fp, 0x8000, SEEK_SET))
+	if (!NintendoData::SharedStorage::Load(fp, "boot9.bin")) {
+		if (!fseek(fp, 0x8000, SEEK_SET))
 			loaded = ::LoadBoot9Protected(fp);
 		fclose(fp);
 	}
-	if(!loaded && !NintendoData::SharedStorage::Load(fp, "boot9_prot.bin")) {
+	if (!loaded && !NintendoData::SharedStorage::Load(fp, "boot9_prot.bin")) {
 		loaded = ::LoadBoot9Protected(fp);
 		fclose(fp);
 	}
-	if(!loaded && !NintendoData::SharedStorage::Load(fp, "boot9_protected.bin")) {
+	if (!loaded && !NintendoData::SharedStorage::Load(fp, "boot9_protected.bin")) {
 		loaded = ::LoadBoot9Protected(fp);
 		fclose(fp);
 	}
@@ -537,16 +537,16 @@ bool NintendoData::KeyUtils::Storage::ReloadStorage() {
 }
 
 u8* NintendoData::KeyUtils::Storage::GetKey(u8* outkey, int keyslot, NintendoData::KeyUtils::Storage::KeyType type, bool retail) {
-	if(!outkey) return NULL;
-	if(type != KeyX && type != KeyY && type != KeyNormal) return NULL;
-	else if(type == KeyX && (keyslot < 0x2C || keyslot > 0x3F) && keyslot != 0x18 && keyslot != 0x1B && keyslot != 0x25) return NULL;
-	else if(type == KeyY && (keyslot < 0x4 || keyslot > 0xB)) return NULL;
-	else if(keyslot < 0xC || keyslot > 0x3F) return NULL;
-	if(!ReloadStorage()) return NULL;
+	if (!outkey) return NULL;
+	if (type != KeyX && type != KeyY && type != KeyNormal) return NULL;
+	else if (type == KeyX && (keyslot < 0x2C || keyslot > 0x3F) && keyslot != 0x18 && keyslot != 0x1B && keyslot != 0x25) return NULL;
+	else if (type == KeyY && (keyslot < 0x4 || keyslot > 0xB)) return NULL;
+	else if (keyslot < 0xC || keyslot > 0x3F) return NULL;
+	if (!ReloadStorage()) return NULL;
 	const u8* key = NULL;
-	if(type == KeyY) {
+	if (type == KeyY) {
 		key = (retail ? Retail::KeyYs[keyslot-0x4] : Dev::KeyYs[keyslot-0x4]);
-	} else if(type == KeyX && (keyslot == 0x18 || keyslot == 0x1B || keyslot == 0x25)) {
+	} else if (type == KeyX && (keyslot == 0x18 || keyslot == 0x1B || keyslot == 0x25)) {
 		int index = 0;
 		switch(keyslot) {
 		case 0x18:
@@ -561,28 +561,28 @@ u8* NintendoData::KeyUtils::Storage::GetKey(u8* outkey, int keyslot, NintendoDat
 			break;
 		}
 		key = (retail ? Retail::NCCHKeys[index] : Dev::NCCHKeys[index]);
-	} else if(type == KeyX) {
+	} else if (type == KeyX) {
 		int index;
-		if(keyslot >= 0x2C && keyslot < 0x30) index = 0;
-		else if(keyslot >= 0x30 && keyslot < 0x34) index = 1;
-		else if(keyslot >= 0x34 && keyslot < 0x38) index = 2;
-		else if(keyslot >= 0x38 && keyslot < 0x3C) index = 3;
+		if (keyslot >= 0x2C && keyslot < 0x30) index = 0;
+		else if (keyslot >= 0x30 && keyslot < 0x34) index = 1;
+		else if (keyslot >= 0x34 && keyslot < 0x38) index = 2;
+		else if (keyslot >= 0x38 && keyslot < 0x3C) index = 3;
 		else index = keyslot - 0x38;
 		key = (retail ? Retail::KeyXs[index] : Dev::KeyXs[index]);
 	} else {
 		int index;
-		if(keyslot >= 0xC && keyslot < 0x10) index = 0;
-		else if(keyslot >= 0x10 && keyslot < 0x14) index = 1;
-		else if(keyslot >= 0x14 && keyslot < 0x18) index = keyslot - 0x12;
-		else if(keyslot >= 0x18 && keyslot < 0x1C) index = 6;
-		else if(keyslot >= 0x1C && keyslot < 0x20) index = 7;
-		else if(keyslot >= 0x20 && keyslot < 0x24) index = 8;
-		else if(keyslot >= 0x24 && keyslot < 0x29) index = 9;
-		else if(keyslot >= 0x29 && keyslot < 0x2C) index = keyslot - 0x1F;
-		else if(keyslot >= 0x2C && keyslot < 0x30) index = 13;
-		else if(keyslot >= 0x30 && keyslot < 0x34) index = 14;
-		else if(keyslot >= 0x34 && keyslot < 0x38) index = 15;
-		else if(keyslot >= 0x38 && keyslot < 0x3D) index = 16;
+		if (keyslot >= 0xC && keyslot < 0x10) index = 0;
+		else if (keyslot >= 0x10 && keyslot < 0x14) index = 1;
+		else if (keyslot >= 0x14 && keyslot < 0x18) index = keyslot - 0x12;
+		else if (keyslot >= 0x18 && keyslot < 0x1C) index = 6;
+		else if (keyslot >= 0x1C && keyslot < 0x20) index = 7;
+		else if (keyslot >= 0x20 && keyslot < 0x24) index = 8;
+		else if (keyslot >= 0x24 && keyslot < 0x29) index = 9;
+		else if (keyslot >= 0x29 && keyslot < 0x2C) index = keyslot - 0x1F;
+		else if (keyslot >= 0x2C && keyslot < 0x30) index = 13;
+		else if (keyslot >= 0x30 && keyslot < 0x34) index = 14;
+		else if (keyslot >= 0x34 && keyslot < 0x38) index = 15;
+		else if (keyslot >= 0x38 && keyslot < 0x3D) index = 16;
 		else index = keyslot - 0x2C;
 		key = (retail ? Retail::KeyNormals[index] : Dev::KeyNormals[index]);
 	}
@@ -591,18 +591,18 @@ u8* NintendoData::KeyUtils::Storage::GetKey(u8* outkey, int keyslot, NintendoDat
 }
 
 u8* NintendoData::KeyUtils::Storage::GetCommonKey(u8* outkey, int index, bool retail) {
-	if(index < 0 || index > 5) return NULL;
-	if(!ReloadStorage()) return NULL;
+	if (index < 0 || index > 5) return NULL;
+	if (!ReloadStorage()) return NULL;
 	const u8* key = NULL;
-	if(index == 0) key = (retail ? Retail::CommonKey0 : Dev::CommonKey0);
+	if (index == 0) key = (retail ? Retail::CommonKey0 : Dev::CommonKey0);
 	else key = CommonKeys[index-1];
 	memcpy(outkey, key, 16);
 	return outkey;
 }
 
 bool NintendoData::KeyUtils::TWLScrambler(u8* outnormal, const u8* keyX, const u8* keyY) {
-	if(!outnormal || !keyX || !keyY) return false;
-	if(!Storage::ReloadStorage()) return false;
+	if (!outnormal || !keyX || !keyY) return false;
+	if (!Storage::ReloadStorage()) return false;
 	u8 xoredkeys[16];
 	// xoring now without BN because it doesn't give me an XOR implementation
 	for(int i = 0; i < 16; i++) {
@@ -610,22 +610,22 @@ bool NintendoData::KeyUtils::TWLScrambler(u8* outnormal, const u8* keyX, const u
 	}
 	// keyX and keyY are taken in little endian
 	BIGNUM* workkey1 = BN_lebin2bn(xoredkeys, 16, NULL);
-	if(!workkey1) return false;
+	if (!workkey1) return false;
 	BIGNUM* workkey2 = BN_bin2bn(TWLConstant, 16, NULL);
-	if(!workkey2) {
+	if (!workkey2) {
 		BN_clear_free(workkey1);
 		return false;
 	}
 	bool success = false;
 	do {
-		if(!workkey1 || !workkey2) break;
-		if(!BN_add(workkey1, workkey1, workkey2)) break;
-		if(BN_num_bits(workkey1) > 128)
+		if (!workkey1 || !workkey2) break;
+		if (!BN_add(workkey1, workkey1, workkey2)) break;
+		if (BN_num_bits(workkey1) > 128)
 			BN_mask_bits(workkey1, 128);
-		if(!BN_lshift(workkey2, workkey1, 42)) break;
-		if(!BN_rshift(workkey1, workkey1, 86)) break;
-		if(!BN_add(workkey1, workkey1, workkey2)) break;
-		if(BN_bn2binpad(workkey1, outnormal, 16) != 16) break;
+		if (!BN_lshift(workkey2, workkey1, 42)) break;
+		if (!BN_rshift(workkey1, workkey1, 86)) break;
+		if (!BN_add(workkey1, workkey1, workkey2)) break;
+		if (BN_bn2binpad(workkey1, outnormal, 16) != 16) break;
 		success = true;
 	} while(0);
 	BN_clear_free(workkey1);
@@ -634,39 +634,39 @@ bool NintendoData::KeyUtils::TWLScrambler(u8* outnormal, const u8* keyX, const u
 }
 
 bool NintendoData::KeyUtils::CTRScrambler(u8* outnormal, const u8* keyX, const u8* keyY) {
-	if(!outnormal || !keyX || !keyY) return false;
-	if(!Storage::ReloadStorage()) return false;
+	if (!outnormal || !keyX || !keyY) return false;
+	if (!Storage::ReloadStorage()) return false;
 	BIGNUM* workkey1 = BN_bin2bn(keyX, 16, NULL);
-	if(!workkey1) return false;
+	if (!workkey1) return false;
 	BIGNUM* workkey2 = BN_new();
-	if(!workkey2) {
+	if (!workkey2) {
 		BN_clear_free(workkey1);
 		return false;
 	}
 	bool success = false;
 	do {
-		if(!workkey1 || !workkey2) break;
-		if(!BN_lshift(workkey2, workkey1, 2)) break;
-		if(BN_num_bits(workkey2) > 128)
+		if (!workkey1 || !workkey2) break;
+		if (!BN_lshift(workkey2, workkey1, 2)) break;
+		if (BN_num_bits(workkey2) > 128)
 			BN_mask_bits(workkey2, 128);
-		if(!BN_rshift(workkey1, workkey1, 126)) break;
-		if(!BN_add(workkey1, workkey1, workkey2)) break;
+		if (!BN_rshift(workkey1, workkey1, 126)) break;
+		if (!BN_add(workkey1, workkey1, workkey2)) break;
 		u64 buffer[2][2];
-		if(BN_bn2binpad(workkey1, (u8*)&buffer[0], 16) != 16) break;
+		if (BN_bn2binpad(workkey1, (u8 *)&buffer[0], 16) != 16) break;
 		memcpy(&buffer[1], keyY, 16);
 		buffer[0][0] ^= buffer[1][0];
 		buffer[0][1] ^= buffer[1][1];
-		if(!BN_bin2bn((u8*)&buffer[0], 16, workkey1)) break;
-		if(!BN_bin2bn(Constant_C, 16, workkey2)) break;
-		if(!BN_add(workkey1, workkey1, workkey2)) break;
-		if(BN_num_bits(workkey1) > 128)
+		if (!BN_bin2bn((u8 *)&buffer[0], 16, workkey1)) break;
+		if (!BN_bin2bn(Constant_C, 16, workkey2)) break;
+		if (!BN_add(workkey1, workkey1, workkey2)) break;
+		if (BN_num_bits(workkey1) > 128)
 			BN_mask_bits(workkey1, 128);
-		if(!BN_lshift(workkey2, workkey1, 87)) break;
-		if(BN_num_bits(workkey2) > 128)
+		if (!BN_lshift(workkey2, workkey1, 87)) break;
+		if (BN_num_bits(workkey2) > 128)
 			BN_mask_bits(workkey2, 128);
-		if(!BN_rshift(workkey1, workkey1, 41)) break;
-		if(!BN_add(workkey1, workkey1, workkey2)) break;
-		if(BN_bn2binpad(workkey1, outnormal, 16) != 16) break;
+		if (!BN_rshift(workkey1, workkey1, 41)) break;
+		if (!BN_add(workkey1, workkey1, workkey2)) break;
+		if (BN_bn2binpad(workkey1, outnormal, 16) != 16) break;
 		success = true;
 	} while(0);
 	BN_clear_free(workkey1);
@@ -684,10 +684,10 @@ void NintendoData::KeyUtils::SeedKeyY(u8* keyY, const u8* seed) {
 }
 
 void NintendoData::AESEngine::CrypterContext::ResetIV(const u8* iv) {
-	if(_mode == ECB) return;
-	if(!iv)
+	if (_mode == ECB) return;
+	if (!iv)
 		throw std::invalid_argument("Cipher expected IV.");
-	if(!EVP_CIPHER_CTX_reset((EVP_CIPHER_CTX*)context))
+	if (!EVP_CIPHER_CTX_reset((EVP_CIPHER_CTX *)context))
 		throw std::runtime_error("Unexpected error from context reset.");
 	const EVP_CIPHER *(*ciphername)() = nullptr;
 	switch(_mode) {
@@ -700,19 +700,19 @@ void NintendoData::AESEngine::CrypterContext::ResetIV(const u8* iv) {
 	default:
 		break;
 	}
-	if(!EVP_CipherInit_ex((EVP_CIPHER_CTX*)context, ciphername(), NULL, _key, iv, (int)_encrypt))
+	if (!EVP_CipherInit_ex((EVP_CIPHER_CTX *)context, ciphername(), NULL, _key, iv, (int)_encrypt))
 		throw std::runtime_error("CrypterContext unable to init context and is now in invalid state.");
 }
 
 void NintendoData::AESEngine::CrypterContext::Cipher(u8* dataout, const u8* datain, int length) {
-	if(length < 0)
+	if (length < 0)
 		throw std::invalid_argument("CrypterContext got negative length.");
-	if(length % 16)
+	if (length % 16)
 		throw std::invalid_argument("CrypterContext expected length divisable by 16.");
 	int outlength;
-	if(!EVP_CipherUpdate((EVP_CIPHER_CTX*)context, dataout, &outlength, datain, length))
+	if (!EVP_CipherUpdate((EVP_CIPHER_CTX *)context, dataout, &outlength, datain, length))
 		throw std::runtime_error("CrypterContext cipher error.");
-	if(outlength != length)
+	if (outlength != length)
 		throw std::runtime_error("CrypterContext only supports full chunks at a time, but unexpected length was returned.");
 }
 
@@ -733,40 +733,40 @@ NintendoData::AESEngine::CrypterContext::CrypterContext(NintendoData::AESEngine:
 	_mode = mode;
 	_encrypt = encrypt;
 	EVP_CIPHER_CTX *_context = EVP_CIPHER_CTX_new();
-	if(!context)
+	if (!context)
 		throw std::runtime_error("CrypterContext unable to allocate context.");
 	try {
-		if(!EVP_CipherInit_ex(_context, ciphername(), NULL, key, iv, (int)encrypt))
+		if (!EVP_CipherInit_ex(_context, ciphername(), NULL, key, iv, (int)encrypt))
 			throw std::runtime_error("CrypterContext unable to init context.");
-		if(EVP_CIPHER_CTX_key_length(_context) != 16)
+		if (EVP_CIPHER_CTX_key_length(_context) != 16)
 			throw std::runtime_error("CrypterContext unexpected key length.");
-		if(mode != ECB && EVP_CIPHER_CTX_iv_length(_context) != 16)
+		if (mode != ECB && EVP_CIPHER_CTX_iv_length(_context) != 16)
 			throw std::runtime_error("CrypterContext unexpected iv length.");
 		EVP_CIPHER_CTX_set_padding(_context, 0);
 	} catch (...) {
 		EVP_CIPHER_CTX_free(_context);
 		throw;
 	}
-	context = (void*)_context;
+	context = (void *)_context;
 }
 
 NintendoData::AESEngine::CrypterContext::~CrypterContext() {
-	EVP_CIPHER_CTX_free((EVP_CIPHER_CTX*)context);
+	EVP_CIPHER_CTX_free((EVP_CIPHER_CTX *)context);
 }
 
 template<const EVP_CIPHER *(*ciphername)(), bool has_iv, bool encrypt>
 static inline bool cipher(u8* out, const u8* data, int length, const u8* key, const u8* iv) {
 	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-	if(!ctx) return false;
+	if (!ctx) return false;
     bool ret = false;
     do {
-        if(!EVP_CipherInit_ex(ctx, ciphername(), NULL, key, has_iv ? iv : NULL, (int)encrypt)) break;
-        if(EVP_CIPHER_CTX_key_length(ctx) != 16) break;
-        if(has_iv && EVP_CIPHER_CTX_iv_length(ctx) != 16) break;
+        if (!EVP_CipherInit_ex(ctx, ciphername(), NULL, key, has_iv ? iv : NULL, (int)encrypt)) break;
+        if (EVP_CIPHER_CTX_key_length(ctx) != 16) break;
+        if (has_iv && EVP_CIPHER_CTX_iv_length(ctx) != 16) break;
         EVP_CIPHER_CTX_set_padding(ctx, 0);
         int foo;
-        if(!EVP_CipherUpdate(ctx, out, &foo, data, length)) break;
-        if(!EVP_CipherFinal_ex(ctx, out + foo, &foo)) break;
+        if (!EVP_CipherUpdate(ctx, out, &foo, data, length)) break;
+        if (!EVP_CipherFinal_ex(ctx, out + foo, &foo)) break;
         ret = true;
     } while(0);
     EVP_CIPHER_CTX_free(ctx);
@@ -781,7 +781,7 @@ static inline bool cipher(u8* out, const u8* data, int length, const u8* key, co
 #define ECB_Decrypt cipher<&EVP_aes_128_ecb, false, false>
 
 NintendoData::AESEngine& NintendoData::AESEngine::operator=(NintendoData::AESEngine&& other) {
-	if(this == &other) return *this;
+	if (this == &other) return *this;
 	std::swap(this->keyslots, other.keyslots);
 	this->retail = other.retail;
 	memset(other.keyslots, 0, sizeof(*other.keyslots));
@@ -790,20 +790,20 @@ NintendoData::AESEngine& NintendoData::AESEngine::operator=(NintendoData::AESEng
 }
 
 NintendoData::AESEngine& NintendoData::AESEngine::operator=(const NintendoData::AESEngine& other) {
-	if(this == &other) return *this;
+	if (this == &other) return *this;
 	memcpy(this->keyslots, other.keyslots, sizeof(*keyslots));
 	this->retail = other.retail;
 	return *this;
 }
 
 void NintendoData::AESEngine::Cipher(NintendoData::AESEngine::Modes mode, int keyslot, const u8* iv, u8* out, const u8* data, int length, bool encrypt) {
-	if(length < 0 || length & 0xF)
+	if (length < 0 || length & 0xF)
 		throw std::invalid_argument("AESEngine encountered invalid data length.");
-	if(!out || !data)
+	if (!out || !data)
 		throw std::invalid_argument("AESEngine encountered NULL data in or out pointer.");
-	if(mode != ECB && !iv)
+	if (mode != ECB && !iv)
 		throw std::invalid_argument("AESEngine cipher expected IV.");
-	if(keyslot < 0 || keyslot >= 0x40)
+	if (keyslot < 0 || keyslot >= 0x40)
 		throw std::invalid_argument("AESEngine invalid keyslot.");
 	u8 (&_keyslots)[3][64][16] = *keyslots;
 	bool ret;
@@ -820,76 +820,76 @@ void NintendoData::AESEngine::Cipher(NintendoData::AESEngine::Modes mode, int ke
 	default:
 		throw std::invalid_argument("AESEngine unknown engine.");
 	}
-	if(!ret)
+	if (!ret)
 		throw std::runtime_error("AESEngine cipher fail.");
 }
 
 NintendoData::AESEngine& NintendoData::AESEngine::SetKey(NintendoData::KeyUtils::Storage::KeyType type, int keyslot, const u8* key, const u8* seed) {
-	if(type != KeyUtils::Storage::KeyX && type != KeyUtils::Storage::KeyY && type != KeyUtils::Storage::KeyNormal)
+	if (type != KeyUtils::Storage::KeyX && type != KeyUtils::Storage::KeyY && type != KeyUtils::Storage::KeyNormal)
 		throw std::invalid_argument("AESEngine invalid key type.");
-	if(keyslot < 0 || keyslot >= 0x40)
+	if (keyslot < 0 || keyslot >= 0x40)
 		throw std::invalid_argument("AESEngine invalid keyslot.");
-	if(!key)
+	if (!key)
 		throw std::invalid_argument("AESEngine encountered NULL key pointer.");
 	u8 keycopy[16];
 	memcpy(keycopy, key, 16);
-	if(type == KeyUtils::Storage::KeyY && seed)
+	if (type == KeyUtils::Storage::KeyY && seed)
 		KeyUtils::SeedKeyY(keycopy, seed);
 	memcpy((*keyslots)[type][keyslot], keycopy, 16);
-	if(type != KeyUtils::Storage::KeyNormal) {
+	if (type != KeyUtils::Storage::KeyNormal) {
 		bool ret;
-		if(keyslot >= 4) ret = KeyUtils::CTRScrambler((*keyslots)[2][keyslot], (*keyslots)[0][keyslot], (*keyslots)[1][keyslot]);
+		if (keyslot >= 4) ret = KeyUtils::CTRScrambler((*keyslots)[2][keyslot], (*keyslots)[0][keyslot], (*keyslots)[1][keyslot]);
 		else ret = KeyUtils::TWLScrambler((*keyslots)[2][keyslot], (*keyslots)[0][keyslot], (*keyslots)[1][keyslot]);
-		if(!ret)
+		if (!ret)
 			throw std::runtime_error("AESEngine Scrambler error.");
 	}
 	return *this;
 }
 
 NintendoData::AESEngine& NintendoData::AESEngine::SetCommon(int commonindex) {
-	if(commonindex < 0 || commonindex > 5)
+	if (commonindex < 0 || commonindex > 5)
 		throw std::invalid_argument("AESEngine invalid common index.");
-	if(!KeyUtils::Storage::ReloadStorage())
+	if (!KeyUtils::Storage::ReloadStorage())
 		throw std::runtime_error("AESEngine couldn't get common key.");
 	u8* key = KeyUtils::Storage::GetCommonKey((*keyslots)[1][0x3D], commonindex, retail);
-	if(!key)
+	if (!key)
 		throw std::runtime_error("AESEngine couldn't get common key.");
-	if(KeyUtils::CTRScrambler((*keyslots)[2][0x3D], (*keyslots)[0][0x3D], (*keyslots)[1][0x3D]))
+	if (KeyUtils::CTRScrambler((*keyslots)[2][0x3D], (*keyslots)[0][0x3D], (*keyslots)[1][0x3D]))
 		throw std::runtime_error("AESEngine Scrambler error.");
 	return *this;
 }
 
 NintendoData::AESEngine& NintendoData::AESEngine::SetFixedKey(int keyslot) {
-	if(keyslot < 0 || keyslot >= 0x40)
+	if (keyslot < 0 || keyslot >= 0x40)
 		throw std::invalid_argument("AESEngine invalid keyslot.");
-	if(!KeyUtils::Storage::ReloadStorage())
+	if (!KeyUtils::Storage::ReloadStorage())
 		throw std::runtime_error("AESEngine couldn't get fixed key.");
 	memcpy((*keyslots)[2][keyslot], FixedKey, 16);
 	return *this;
 }
 
 NintendoData::AESEngine& NintendoData::AESEngine::SetEncTitleKey(const u8* key, u64 titleid, int commonindex) {
-	if(!key)
+	if (!key)
 		throw std::invalid_argument("AESEngine encountered NULL key pointer.");
 	u64 iv[2] = {Endian::Be(titleid), 0};
 	SetCommon(commonindex);
-	if(!CBC_Decrypt((*keyslots)[2][0x11], key, 16, (*keyslots)[2][0x3D], (u8*)&iv))
+	if (!CBC_Decrypt((*keyslots)[2][0x11], key, 16, (*keyslots)[2][0x3D], (u8 *)&iv))
 		throw std::runtime_error("AESEngine cipher fail.");
 	return *this;
 }
 
 NintendoData::AESEngine::CrypterContext NintendoData::AESEngine::GetCrypterContext(NintendoData::AESEngine::Modes mode, int keyslot, const u8* iv, bool encrypt) {
-	if(mode != CTR && mode != CBC && mode != ECB)
+	if (mode != CTR && mode != CBC && mode != ECB)
 		throw std::invalid_argument("AESEngine unknown engine.");
-	if(keyslot < 0 || keyslot >= 0x40)
+	if (keyslot < 0 || keyslot >= 0x40)
 		throw std::invalid_argument("AESEngine invalid keyslot.");
-	if(mode != ECB && !iv)
+	if (mode != ECB && !iv)
 		throw std::invalid_argument("AESEngine cipher expected IV.");
 	return CrypterContext(mode, (*keyslots)[2][keyslot], iv, encrypt ? true : false);
 }
 
 bool NintendoData::AESEngine::ReloadFromKeyStorage() {
-	if(!KeyUtils::Storage::ReloadStorage()) return false;
+	if (!KeyUtils::Storage::ReloadStorage()) return false;
 	u8 (&_keyslots)[3][64][16] = *keyslots;
 	memcpy(_keyslots[1][4], retail ? Retail::KeyYs : Dev::KeyYs, sizeof(Retail::KeyYs));
 	memcpy(_keyslots[0][0x18], retail ? Retail::NCCHKeys[0] : Dev::NCCHKeys[0], 16);
@@ -919,9 +919,9 @@ bool NintendoData::AESEngine::ReloadFromKeyStorage() {
 }
 
 NintendoData::AESEngine::AESEngine(bool _retail, bool keysneeded) : keyslots(NULL), retail(_retail) {
-	keyslots = (u8 (*)[3][64][16])calloc(sizeof(*keyslots), 1);
-	if(!keyslots) throw std::bad_alloc();
-	if(!ReloadFromKeyStorage() && keysneeded) {
+	keyslots = (u8 ( *)[3][64][16])calloc(sizeof(*keyslots), 1);
+	if (!keyslots) throw std::bad_alloc();
+	if (!ReloadFromKeyStorage() && keysneeded) {
 		free(keyslots);
 		throw std::runtime_error("AESEngine expected keys couldn't be loaded.");
 	}

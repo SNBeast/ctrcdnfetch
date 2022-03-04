@@ -94,7 +94,6 @@ public:
 		~Downloader();
 
 		bool Download(u64 expected_size = 0, bool write_opt_files = false);
-		bool WriteExtraFiles();
 
 		void* GetBufferAndDetach(size_t& length)
 		{

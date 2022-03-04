@@ -36,35 +36,58 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 			manager
 				.SetAttribute(DownloadManager::FILENAME, "tmd")
 				.SetAttribute(DownloadManager::URL, "%s/%016llX/tmd", baseurl, GetTitleId());
-
-			if (!nodownload)
-				manager.SetAttribute(DownloadManager::OUTPATH, "%s/tmd", outdir);
 		}
 
 		DownloadManager::Downloader tmddownloader = manager.GetDownloader();
 
-		if (!tmddownloader.Download(0, write_opt_files))
+		if (!tmddownloader.Download(0, set_version ? write_opt_files : false))
 			throw std::runtime_error("Failed to download TMD");
 
-		tmdbuffer = (u8*)tmddownloader.GetBufferAndDetach(tmdlen);
+		tmdbuffer = (u8 *)tmddownloader.GetBufferAndDetach(tmdlen);
 
 		if (!tmdbuffer || !tmdlen)
 			throw std::runtime_error("Failed to download TMD to a buffer");
 
 		TMD tmd(tmdbuffer, tmdlen);
 
-		u16 tmdcontentcount = tmd.GetContentCount();
+		if (!set_version)
+		{
+			free(tmdbuffer);
+			tmdbuffer = nullptr;
 
+			version = tmd.GetTitleVersion();
+
+			manager
+				.SetAttribute(DownloadManager::PROGRESS, true)
+				.SetAttribute(DownloadManager::BUFFER, true)
+				.SetAttribute(DownloadManager::FILENAME, "tmd.%d", version)
+				.SetAttribute(DownloadManager::URL, "%s/%016llX/tmd.%d", baseurl, GetTitleId(), version);
+
+			if (!nodownload)
+				manager.SetAttribute(DownloadManager::OUTPATH, "%s/tmd.%d", outdir, version);
+
+			tmddownloader = manager.GetDownloader();
+
+			if (!tmddownloader.Download(0, write_opt_files))
+				throw std::runtime_error("Failed to download TMD");
+
+			tmdbuffer = (u8 *)tmddownloader.GetBufferAndDetach(tmdlen);
+
+			if (!tmdbuffer || !tmdlen)
+				throw std::runtime_error("Failed to download TMD to a buffer");
+		}
+
+		u16 content_count = tmd.GetContentCount();
 		int tries = 0;
 
-		for (u16 i = 0; i < tmdcontentcount; i++)
+		for (u16 i = 0; i < content_count; i++)
 		{
 			u64 title_id = GetTitleId();
 			u32 id = tmd.ChunkRecord(i).GetContentId();
 			u64 content_size = tmd.ChunkRecord(i).GetContentSize();
 
 			if (nodownload)
-				printf("%08x\n\n", id);
+				printf("Content %08x - Not downloading\n\n", id);
 
 			manager
 				.SetAttribute(DownloadManager::FILENAME, "%08x", id)
@@ -115,37 +138,44 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 			tries = 0;
 		}
 
-		time_t t = time(NULL);
-		struct tm *tm = gmtime(&t);
+		if (write_opt_files)
+		{
+			time_t t = time(NULL);
+			struct tm *tm = gmtime(&t);
 
-		//                    outdir len     + / + info + . + txt + \0
-		int tidfile_pathlen = strlen(outdir) + 1 + 4    + 1 + 3   + 1;
+			//                     outdir len     + / + info + . + txt + \0
+			int infofile_pathlen = strlen(outdir) + 1 + 4    + 1 + 3   + 1;
 
-		char *tidfile_path = (char *)malloc(tidfile_pathlen);
+			char *infofile_path = (char *)malloc(infofile_pathlen);
 
-		if (!tidfile_path)
-			throw std::runtime_error("Could not allocate memory for info.txt file path");
+			if (!infofile_path)
+				throw std::runtime_error("Could not allocate memory for info.txt file path");
 
-		snprintf(tidfile_path, tidfile_pathlen, "%s/info.txt", outdir);
+			snprintf(infofile_path, infofile_pathlen, "%s/info.txt", outdir);
 
-		FILE *f = fopen(tidfile_path, "w");
-		free(tidfile_path);
+			FILE *f = fopen(infofile_path, "w");
+			free(infofile_path);
 
-		if (!f)
-			throw std::runtime_error("Failed to open info.txt file in output directory");
+			if (!f)
+				throw std::runtime_error("Failed to open info.txt file in output directory");
 
-		fprintf(f, "%016llX\n", (unsigned long long)GetTitleId());
-		fprintf(f, "%04d-%02d-%02d\n", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
-		fclose(f);
+			fprintf(
+				f, 
+				"%016llX\n"
+				"%04d-%02d-%02d\n", 
+				(unsigned long long)GetTitleId(), tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+			fclose(f);
+		}
 	}
 	catch (...)
 	{
 		free(b64_encticket);
 		free(b64_encticketkey);
-		free(tmdbuffer);
+		if (tmdbuffer) free(tmdbuffer);
 		throw;
 	}
+	
 	free(b64_encticket);
 	free(b64_encticketkey);
-	free(tmdbuffer);
+	if (tmdbuffer) free(tmdbuffer);
 }
