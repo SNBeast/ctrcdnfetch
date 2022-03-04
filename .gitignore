@@ -8,9 +8,6 @@
 !*.h
 !Makefile
 
-#and bin folder...
-!bin/.gitkeep
-
 #also itself....
 !.gitignore
 
