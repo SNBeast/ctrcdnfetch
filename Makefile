@@ -2,7 +2,7 @@ OBJS = $(subst .cpp,.o,$(wildcard *.cpp))
 
 OUTPUT = ctrcdnfetch
 LIBS = -lcurl -lssl -lcrypto -lz
-CXXFLAGS = -g -Wall -std=c++11
+CXXFLAGS = -g -Wall -std=c++17
 CXX = g++
 
 all: $(OBJS)

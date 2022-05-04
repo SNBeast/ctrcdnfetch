@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <new>
 #include <mutex>
+#include <filesystem>
 #include "DownloadManager.hpp"
 
 #define HASH_BUFSIZE 4096
@@ -152,8 +153,17 @@ DownloadManager::Downloader::Downloader(DownloadManager& data, u64 expected_size
 	data.lock();
 
 	outpath = data.outpath;
+	
+	FILE* out = NULL;
 
-	FILE* out = !outpath ? NULL : fopen(outpath, "wb");
+	if (outpath) {
+		if (std::filesystem::exists(outpath)) {
+			printf("File exists.\n");
+			goto skipFile;
+		}
+	}
+
+	out = !outpath ? NULL : fopen(outpath, "wb");
 
 	if (outpath && !out)
 	{
@@ -177,6 +187,8 @@ DownloadManager::Downloader::Downloader(DownloadManager& data, u64 expected_size
 
 		remove(outpath); //remove empty file
 	}
+
+	skipFile:
 
 	if (data.chunk) chunk = data.SlistClone();
 
@@ -237,6 +249,12 @@ DownloadManager::Downloader::~Downloader()
 bool DownloadManager::Downloader::Download(u64 expected_size, bool write_opt_files)
 {
 	downloaded = 0LLU;
+
+	if (outpath) {
+		if (std::filesystem::exists(outpath)) {
+			return true;
+		}
+	}
 
 	out = !outpath ? NULL : fopen(outpath, "wb");
 

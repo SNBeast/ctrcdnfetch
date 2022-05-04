@@ -57,6 +57,9 @@ void NintendoData::CDN::Download(const char* outdir, bool write_opt_files)
 
 			version = tmd.GetTitleVersion();
 
+			printf("%d", version);
+			exit(0);
+
 			manager
 				.SetAttribute(DownloadManager::PROGRESS, true)
 				.SetAttribute(DownloadManager::BUFFER, true)
